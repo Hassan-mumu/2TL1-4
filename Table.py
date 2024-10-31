@@ -1,5 +1,5 @@
 import time
-#hi hassan hoooooooo
+#Diallo
 class Table:
     def __init__(self, tableId, seat_nbr, state="V"):# command_nbr=0):
         self._tableId = tableId
