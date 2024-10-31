@@ -4,7 +4,6 @@ class Table:
     def __init__(self, tableId, seat_nbr, state="V"):# command_nbr=0):
         self._tableId = tableId
         self._seat_nbr = seat_nbr
-        #self._command_nbr = command_nbr
         self._state = state
         self._start_time = None
 
