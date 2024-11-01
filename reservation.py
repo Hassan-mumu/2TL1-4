@@ -40,6 +40,9 @@ class Reservation :
     
     def __del__(self):
        print(f"La réservation a été annulé")
+       for tb in self._table: 
+           tb.changeState('V')
+           print(f"La table {tb.getTable_Id()} est disponible") 
 
 
     
