@@ -33,6 +33,7 @@ class Table:
                 self.startTime()
             elif new_state == 'V':
                 self.resetTime()
+        return new_state
             #elif new_state == 'R':
                 #self.startTime()
 
