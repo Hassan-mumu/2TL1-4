@@ -1,12 +1,15 @@
 from Reservation import Reservation
 from Table import Table
 from datetime import datetime, date
+import re
 from copy import deepcopy
 
 
 class Interface():
+
     def __init__(self, *tables):
         self._all_table = list(tables)
+        self._available_table = []
         self._occupied_table = []
         self._reservations_list = []
         self.__password = 0000
@@ -18,6 +21,7 @@ class Interface():
         for tab in table:
             if table.getState == 'V':
                 self._available_table.append(tab)
+                self._all_table.append(tab)
     
 
     def askpswd(self, attempt):
@@ -46,7 +50,7 @@ class Interface():
         sug_hour = suggested_res[0]
         sug_date = suggested_res[1]
         return res_date == sug_date and abs((res_hour.hour * 60 + res_hour.minute)-(sug_hour.hour * 60 + sug_hour.minute) < 90 )
-    
+
 
     def filterBySeats(self, seats : int, table_list=None):
         cpy_list = deepcopy(table_list) 
@@ -67,8 +71,62 @@ class Interface():
         return t
 
 
-    def makeReservation(self, typeReservation): 
-        
-        if typeReservation == "R":
-            seats = int(input("Pour combien de personne : (max 12)"))
+    def askDate(self):
+        valid = False
+        formatDate = r"^\d{2}/\d{2}/\d{4}$"
+        proposedDate = ""
+        while not valid:
+            proposedDate = input("Entrée une date valide sous le format dd/mm/yyyy (ex:24/10/2023) : ")
+            valid = re.match(formatDate, proposedDate)
+            if valid:
+                proposedDate = datetime.strptime(proposedDate,"%d/%m/%Y").date()
+        return proposedDate
 
+    
+    def askTime(self):
+        valid = False
+        formatTime = r"^\d{2}:\d{2}}$"
+        proposedTime = ""
+        while not valid:
+            proposedTime = input("Entrée une heure valide sous le format hh:mm (ex:20:30) : ")  # à faire: ne pouvoir entrer des heures que si elles sont entre les crénaux de 10H - 14h30 et 18h - 22h30
+            valid = re.match(formatTime, proposedTime)
+            if valid:
+                proposedTime = datetime.strptime(proposedTime,"%H:%M").time()
+        return proposedTime
+    
+    def askSeats(self):
+        valid = False
+        proposedNumber = 0
+        while not valid :
+            proposedNumber = input("Pour combien de personne (entre 1 et 12) : ")
+            if proposedNumber.isdigit():
+                proposedNumber = int(proposedNumber)
+                valid = 0 < int(proposedNumber) <= 12
+
+        return proposedNumber
+        
+
+    def makeReservation(self, typeReservation):
+        reservationDate = date.today().strftime("%d/%m/%Y")
+        reservationTime = datetime.now().strftime("%h:%m")
+        reservationName = "defaultName"
+        if typeReservation == "R":
+            reservationDate = self.askDate()
+            reservationTime = self.askTime()
+            reservationName = input("Entrée un nom pour la réservation : ")
+
+        reservationSeats = self.askSeats()
+        reservationTable = self.filterBySeats(reservationSeats,self.filterByDateTime(reservationDate, reservationTime, self._all_table))[0]
+        self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
+
+
+"""
+Note d'ajout: 
+- Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
+- Faire une fonction qui affiche les heures disponibles pour une tables choisis
+- Faire une fonction qui affiche les listes des tables selon un format clair et bien visuelle
+- Dans makeReservation, faire en sorte d'ajouter la reservation à la table
+- Faire le système de notification (flou)
+- Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
+- Faire une fonction qui check les réservation, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
+"""

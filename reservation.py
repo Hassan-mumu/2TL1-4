@@ -2,13 +2,11 @@ from Table import Table
 from datetime import datetime, date
 
 class Reservation : 
-    def __init__(self, table : list, name="defaultName" , hour=None, date=None):
+    def __init__(self, table : list , hour=None, date=None, name="defaultName"):
         self._name = name 
         self._table = table if isinstance(table, list) else [table]
         self._hour = hour if bool(hour) else datetime.now().time()
         self._date = date if date is not None else datetime.now().date()
-        # hour_res = datetime.now().strftime("%h:%m")
-        # date_res = date.today().strftime("%d/%m/%y")
         new_state = 'R' if self._name != "defaultName" else 'X'
         for tb in self._table:
             tb.changeState(new_state)
@@ -44,10 +42,3 @@ class Reservation :
        for tb in self._table: 
            tb.changeState('V')
            print(f"La table {tb.getTable_Id()} est disponible") 
-
-
-    
-
-    
-
-
