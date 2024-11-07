@@ -8,7 +8,7 @@ from copy import deepcopy
 class Interface():
 
     def __init__(self, *tables):
-        self._all_table = list(tables)
+        self._all_table = list(tables) if tables else []
         self._available_table = []
         self._occupied_table = []
         self._reservations_list = []
@@ -94,6 +94,7 @@ class Interface():
                 proposedTime = datetime.strptime(proposedTime,"%H:%M").time()
         return proposedTime
     
+    
     def askSeats(self):
         valid = False
         proposedNumber = 0
@@ -115,10 +116,29 @@ class Interface():
             reservationTime = self.askTime()
             reservationName = input("Entrée un nom pour la réservation : ")
 
+
         reservationSeats = self.askSeats()
         reservationTable = self.filterBySeats(reservationSeats,self.filterByDateTime(reservationDate, reservationTime, self._all_table))[0]
         self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
 
+
+    def sortTablesByAvailability(self, tables):
+            tables.sort(key=lambda table: len(table.reservations))
+
+    def __str__(self):
+        return(self._all_table)
+
+if __name__ == "main":
+    interface = Interface()
+    for i in range(1, 21):
+        if i <= 10:
+            interface.addTable(Table(2))
+        elif i <= 16:
+            interface.addTable(Table(4))
+        else:
+            interface.addTable(Table(6))
+    print(interface)
+        
 
 """
 Note d'ajout: 

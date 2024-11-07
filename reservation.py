@@ -18,7 +18,7 @@ class Reservation :
     
     def setName(self, name : str):
         self._name = name 
-    
+        
     def getTable(self):
         return self._table 
     
@@ -36,6 +36,9 @@ class Reservation :
     
     def setDate(self, date) : 
         self._date = date 
+
+    def __str__(self):
+        return f"---Reservation de {self.getName}---\n Le {self.getDate}\n à {self.getHour}"
     
     def __del__(self):
        print(f"La réservation a été annulé")

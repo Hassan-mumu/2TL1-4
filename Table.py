@@ -1,18 +1,22 @@
 import time
 
 class Table:
-    def __init__(self, tableId : str, seat_nbr : int, state="V"):# command_nbr=0):
-        self._tableId = tableId
+
+    id = 0
+    def __init__(self, seat_nbr : int, state="V"):# command_nbr=0):
+        
+        self._tableId = Table.id
         self._seat_nbr = seat_nbr
         self._state = state
         self._reservations = []
         self._start_time = None
+        Table.id += 1
 
 
-    def getTable_Id(self):
+    def getId(self):
         return self._tableId
 
-    def setTable_Id(self, tableId):
+    def setId(self, tableId):
         self._tableId = tableId
 
     def getSeat_nbr(self):
@@ -62,3 +66,9 @@ class Table:
     def resetTime(self):
         self._start_time = None
 
+
+    def __str__(self):
+        return f"table {self.getId()}"
+    
+    def __del__(self):
+        Table.idTab -= 1
