@@ -2,7 +2,6 @@ from Reservation import Reservation
 from Table import Table
 from datetime import datetime, date
 import re
-from copy import deepcopy
 
 
 class Interface():
@@ -19,7 +18,7 @@ class Interface():
         if isinstance(table, Table):
             table = [table]
         for tab in table:
-            if table.getState == 'V':
+            if tab.getState() == 'V':
                 self._available_table.append(tab)
                 self._all_table.append(tab)
     
@@ -29,39 +28,29 @@ class Interface():
 
 
     def filterByDateTime(self,date, heure ,table_list):
-        cpy_list = deepcopy(table_list) 
         if table_list == None:
             table_list = self._all_table
-            cpy_list = deepcopy(self._all_table)
 
+        cpy_list = [table for table in table_list]
         if self._reservations_list != []:
-            for table in table_list:
-                if table._reservations != []:
-                    for reservation in table._reservations:
-                        if self.isNotReservable(reservation, (heure,date)):
-                            cpy_list.remove(table)
-                            
+            cpy_list = [[table for reservation in table._reservations if  self.isReservable(reservation, (heure,date))] for table in table_list]
+        print(cpy_list)          
         return cpy_list
 
 
-    def isNotReservable(self, res, suggested_res ):
+    def isReservable(self, res, suggested_res ):
         res_hour = res.getHeure()
         res_date = res.getDate()
         sug_hour = suggested_res[0]
         sug_date = suggested_res[1]
-        return res_date == sug_date and abs((res_hour.hour * 60 + res_hour.minute)-(sug_hour.hour * 60 + sug_hour.minute) < 90 )
+        return res_date == sug_date and abs((res_hour.hour * 60 + res_hour.minute)-(sug_hour.hour * 60 + sug_hour.minute) >= 90 )
 
 
     def filterBySeats(self, seats : int, table_list=None):
-        cpy_list = deepcopy(table_list) 
         if table_list == None:
             table_list = self._all_table
-            cpy_list = deepcopy(self._all_table)
-        
-        for table in table_list:
-            if table.seat_nbr < seats:
-                cpy_list.remove(table)    
-
+        cpy_list = [table for table in table_list if table._seat_nbr >= seats]
+        print(cpy_list)
         return cpy_list            
     
 
@@ -107,7 +96,7 @@ class Interface():
         return proposedNumber
         
 
-    def makeReservation(self, typeReservation):
+    def makeReservation(self, typeReservation="P"):
         reservationDate = date.today().strftime("%d/%m/%Y")
         reservationTime = datetime.now().strftime("%h:%m")
         reservationName = "defaultName"
@@ -126,27 +115,17 @@ class Interface():
             tables.sort(key=lambda table: len(table.reservations))
 
     def __str__(self):
-        return(self._all_table)
+        return f"{self._all_table}"
+    
+    def __repr__(self):
+        return f"{self._all_table}"
+    
+interface = Interface()
 
-if __name__ == "main":
-    interface = Interface()
-    for i in range(1, 21):
-        if i <= 10:
-            interface.addTable(Table(2))
-        elif i <= 16:
-            interface.addTable(Table(4))
-        else:
-            interface.addTable(Table(6))
-    print(interface)
-        
-
-"""
-Note d'ajout: 
-- Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
-- Faire une fonction qui affiche les heures disponibles pour une tables choisis
-- Faire une fonction qui affiche les listes des tables selon un format clair et bien visuelle
-- Dans makeReservation, faire en sorte d'ajouter la reservation à la table
-- Faire le système de notification (flou)
-- Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
-- Faire une fonction qui check les réservation, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
-"""
+for i in range(1, 21):
+    if i <= 10:
+        interface.addTable(Table(2))
+    elif i <= 16:
+        interface.addTable(Table(4))
+    else:
+        interface.addTable(Table(6))

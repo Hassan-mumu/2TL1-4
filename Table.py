@@ -2,7 +2,7 @@ import time
 
 class Table:
 
-    id = 0
+    id = 1
     def __init__(self, seat_nbr : int, state="V"):# command_nbr=0):
         
         self._tableId = Table.id
@@ -70,5 +70,9 @@ class Table:
     def __str__(self):
         return f"table {self.getId()}"
     
+    def __repr__(self):
+        return f"table {self.getId()}"
+    
     def __del__(self):
-        Table.idTab -= 1
+        print(f"la table {self.getId()} a été effacer")
+        Table.id -= 1
