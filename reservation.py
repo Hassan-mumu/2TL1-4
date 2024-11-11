@@ -44,7 +44,6 @@ class Reservation :
         return f"({self.getName()}\n {self.getDate()}\n {self.getHour()})"
     
     def __del__(self):
-       print(f"La réservation a été annulé")
        for tb in self._table: 
            tb.changeState('V')
            print(f"La table {tb.getId()} est disponible") 
