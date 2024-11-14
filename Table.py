@@ -68,11 +68,8 @@ class Table:
 
 
     def __str__(self):
-        return f"table {self.getId()}"
+        return f"table {self.getId()}\n Nombre de place : {self.getSeat_nbr()}\n"
     
     def __repr__(self):
-        return f"table {self.getId()}"
+        return f"table {self.getId()}\n Nombre de place : {self.getSeat_nbr()}\n"
     
-    def __del__(self):
-        print(f"la table {self.getId()} a été effacer")
-        Table.id -= 1

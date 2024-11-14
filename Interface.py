@@ -1,8 +1,7 @@
 from Reservation import Reservation
 from Table import Table
-from datetime import datetime, date
+from datetime import *
 import re
-import time
 
 
 class Interface():
@@ -35,7 +34,6 @@ class Interface():
         cpy_list = [table for table in table_list]
         if self._reservations_list != []:
             cpy_list = [[table for reservation in table._reservations if  self.isReservable(reservation, (heure,date))] for table in table_list]
-        print(cpy_list)          
         return cpy_list
 
 
@@ -51,6 +49,7 @@ class Interface():
         if table_list == None:
             table_list = self._all_table
         cpy_list = [table for table in table_list if table._seat_nbr >= seats]
+        print(f"\nListe des tables proposé :\n {cpy_list}")
         return cpy_list            
     
 
@@ -64,14 +63,19 @@ class Interface():
         valid = False
         formatDate = r"^\d{2}/\d{2}/\d{4}$"
         proposedDate = ""
+        today = date.today() 
+        max_date = today + timedelta(days=60)
         while not valid:
             proposedDate = input("Entrée une date valide sous le format dd/mm/yyyy (ex:24/10/2023) : ")
             valid = re.match(formatDate, proposedDate)
             if valid:
                 proposedDate = datetime.strptime(proposedDate,"%d/%m/%Y").date()
+                valid = proposedDate < max_date
+                if not valid : 
+                    print("On ne peut pas réserver au de-là de cette date : ", max_date)
         return proposedDate
 
-    
+
     def askTime(self):
         valid = False
         formatTime = r"^\d{2}:\d{2}$"
@@ -94,11 +98,11 @@ class Interface():
                 valid = 0 < int(proposedNumber) <= 12
 
         return proposedNumber
-        
+    
 
     def makeReservation(self, typeReservation="P"):
         reservationDate = date.today().strftime("%d/%m/%Y")
-        reservationTime = datetime.now().strftime("%h:%m")
+        reservationTime = datetime.now().strftime("%H:%M")
         reservationName = "defaultName"
         if typeReservation == "R":
             reservationDate = self.askDate()
@@ -108,7 +112,7 @@ class Interface():
         reservationSeats = self.askSeats()
         reservationTable = self.filterBySeats(reservationSeats,self.filterByDateTime(reservationDate, reservationTime, self._all_table))[0]
         self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
-
+        print(f"La table à été assigné : {reservationTable} \n{self._reservations_list[-1]}\n")
 
     def sortTablesByAvailability(self, tables):
             tables.sort(key=lambda table: len(table.reservations))
@@ -129,8 +133,9 @@ for i in range(1, 21):
     else:
         interface.addTable(Table(6))
 
-interface.makeReservation()
-            
+param = input("Sur place 'P' ou sur reservation 'R' : ")
+interface.makeReservation(param)
+
 
 """
 Note d'ajout: 
@@ -141,5 +146,5 @@ Note d'ajout:
 - Dans makeReservation, faire en sorte d'ajouter la reservation à la table
 - Faire le système de notification (flou)
 - Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
-- Faire une fonction qui check les réservation, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
+- Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
 """

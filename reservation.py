@@ -38,12 +38,8 @@ class Reservation :
         self._date = date 
 
     def __str__(self):
-        return f"{self.getName()}\n{self.getDate()}\n{self.getHour()})"
+        return f"Nom : {self.getName()}\nDate : {self.getDate()}\nHeure : {self.getHour()}"
     
     def __repr__(self):
-        return f"({self.getName()}\n {self.getDate()}\n {self.getHour()})"
+        return f"Nom : {self.getName()}\nDate : {self.getDate()}\nHeure : {self.getHour()}"
     
-    def __del__(self):
-       for tb in self._table: 
-           tb.changeState('V')
-           print(f"La table {tb.getId()} est disponible") 
