@@ -1,3 +1,5 @@
+
+
 import tkinter as tk
 
 RED_COLOR = "indianred"
@@ -25,6 +27,7 @@ label_titre.pack(pady=(10, 0), padx=(50, 0), anchor="nw")  # Ancrer en haut à g
 frame_gauche = tk.Frame(fenetre, width=0.35*1920, background=LIGHT_CREAM_COLOR)
 frame_gauche.pack(side="left", fill="y", padx=10)
 frame_gauche.pack_propagate(False)  # Fixer la taille
+
 
 # Créer la frame des boutons à l'intérieur de frame_gauche
 frame_boutons = tk.Frame(frame_gauche, background=LIGHT_CREAM_COLOR)

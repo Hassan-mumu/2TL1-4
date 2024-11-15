@@ -1,4 +1,6 @@
 import time
+from datetime import datetime
+
 
 class Table:
 
@@ -54,14 +56,19 @@ class Table:
             self._reservations.remove(reservation)
 
     def startTime(self):
-        self._start_time = time.perf_counter()
+        self._start_time = datetime.now()
         
     def endTime(self):
         if self._start_time is not None:
-            timer_tb = time.perf_counter() - self._start_time
-            self.resetTime()
-            return timer_tb
-        return 0
+            return self._start_time + timedelta(minutes=90)
+        return None
+
+        #if self._start_time is not None:
+           # timer_tb = time.perf_counter() - self._start_time
+           # self.resetTime()
+            #return timer_tb
+        #return 0
+
 
     def resetTime(self):
         self._start_time = None

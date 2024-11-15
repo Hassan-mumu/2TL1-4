@@ -1,4 +1,6 @@
-from Reservation import Reservation
+from anyio import current_time
+
+from reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -63,16 +65,20 @@ class Interface():
         valid = False
         formatDate = r"^\d{2}/\d{2}/\d{4}$"
         proposedDate = ""
-        today = date.today() 
+        today = datetime.today().date()
         max_date = today + timedelta(days=60)
         while not valid:
             proposedDate = input("Entrée une date valide sous le format dd/mm/yyyy (ex:24/10/2023) : ")
             valid = re.match(formatDate, proposedDate)
             if valid:
                 proposedDate = datetime.strptime(proposedDate,"%d/%m/%Y").date()
-                valid = proposedDate < max_date
-                if not valid : 
-                    print("On ne peut pas réserver au de-là de cette date : ", max_date)
+                #valid = proposedDate < max_date
+                if today <= proposedDate <= max_date:
+                    valid = True
+
+                else:
+                    print(f"La date doit être dans les 2 mois suivant aujourd'hui ({today}) et avant le {max_date}.")
+                    valid = False
         return proposedDate
 
 
@@ -122,7 +128,64 @@ class Interface():
     
     def __repr__(self):
         return f"{self._all_table}"
-    
+
+    def sortTablesByAvailability(self, tables):
+        tables.sort(key=lambda table: len(table._reservations))
+        return tables
+
+    def generateTimeSlots(self,start,end,duration):
+        slots=[]
+        current_hour=start
+        while(datetime.combine(datetime.today(), current_hour) + duration).time() <= end:
+            slots.append(current_hour)
+            next_hour=(datetime.combine(datetime.today(),current_hour) + duration).time()
+            current_hour=next_hour
+        return slots
+
+    def getTodayAvailableTimes(self, table):
+        open_morning=  time(10,0)
+        close_morning= time(14,30)
+        open_evening = time(18,0)
+        close_evening= time(22,30)
+
+        morning_slot=self.generateTimeSlots(open_morning,close_morning,timedelta(minutes=90))
+        evening_slots=self.generateTimeSlots(open_evening,close_evening,timedelta(minutes=90))
+
+        current_time=datetime.now().time()
+        today = datetime.today.date()
+
+        reserved_slots=[ (reservation.hour , (datetime.combine(today, reservation.hour)+ timedelta(minutes=90)).time()) for reservation in table._reservations if reservation.date == today ]
+        available_slots=[ slot for slot in (morning_slots + evening_slots) if slot> current_time and not any(res[0]<= slot < res[1] for res in reserved_slots) ]
+
+        print(f"Créneaux disponibles pour la table {table.getId()} aujourd'hui ({today.strftime('%d/%m/%Y')}):")
+        if available_slots:
+            for slot in available_slots:
+                print(slot.strftime("%H:%M"))
+        else:
+            print("Aucun créneau disponible pour aujourd'hui.")
+
+
+    def check_table_status(self):
+        current_time= datetime.now()
+
+        for table in self._all_table:
+            for reservation in table._reservations:
+                reservation_time=datetime.combine(current_time.date(),reservation.getHour())
+                if reservation_time <= current_time <= reservation_time + timedelta(minutes=15):
+                    if table.getState() != 'X':
+                        self.notify(f"Rappel : La table {table.getId()} réservée à {reservation.getHour().strftime('%H:%M')} n'est toujours pas marquée occupée.")
+
+                if table.getState== 'X' and table.endTime():
+                    end_time = table.endTime()
+                    if end_time and (end_time - current_time <= timedelta(minutes=15)):
+                        self.notify(f"Notification : La table {table.getId()} sera disponible dans 15 minutes.")
+
+
+    def notify(self, message):
+        # Affiche une notification dans une boîte de dialogue
+        messagebox.showinfo("Notification de table", message)
+
+
 interface = Interface()
 
 for i in range(1, 21):
@@ -133,18 +196,19 @@ for i in range(1, 21):
     else:
         interface.addTable(Table(6))
 
+
+
 param = input("Sur place 'P' ou sur reservation 'R' : ")
 interface.makeReservation(param)
 
-
 """
 Note d'ajout: 
-- la date proposer ne doit pas excéder 2mois
-- Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
-- Faire une fonction qui affiche les heures disponibles pour une tables choisis
+- #la date proposer ne doit pas excéder 2mois
+- #Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
+- #Faire une fonction qui affiche les heures disponibles pour une tables choisis
 - Faire une fonction qui affiche les listes des tables selon un format clair et bien visuelle
 - Dans makeReservation, faire en sorte d'ajouter la reservation à la table
-- Faire le système de notification (flou)
+- #Faire le système de notification (flou)
 - Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
 """
