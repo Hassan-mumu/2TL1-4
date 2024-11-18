@@ -1,5 +1,6 @@
 from anyio import current_time
-from Reservation import Reservation
+
+from reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -129,20 +130,41 @@ class Interface():
     def __repr__(self):
         return f"{self._all_table}"
 
-    def sortTablesByAvailability(self, tables):
-        tables.sort(key=lambda table: len(table._reservations))
-        return tables
+    #def sortTablesByAvailability(self, tables):
+        #tables.sort(key=lambda table: len(table._reservations))
+        #return tables
 
     def generateTimeSlots(self,start,end,duration):
+        """#Rajae
+        Pré:
+        :param start: un objet de datetime.time qui représente l'heyre de début.
+        :param end: un objet de datetime.time qui représente l'heure de fin (start < end)
+        :param duration: un objet de type de datetime.timedelta qui repéresente la durée entre deux crénaux (start et end)
+
+        Post:
+            return: une liste triée de datetime.time qui représente des crénaux horaires
+        """
         slots=[]
         current_hour=start
-        while(datetime.combine(datetime.today(), current_hour) + duration).time() <= end:
-            slots.append(current_hour)
+        iterations = 0  # Limite pour éviter une boucle infinie
+        max_iterations = 100
+        while(datetime.combine(datetime.today(), current_hour) + duration).time() <= end and iterations < max_iterations:
+            if current_hour not in slots:
+                slots.append(current_hour)
             next_hour=(datetime.combine(datetime.today(),current_hour) + duration).time()
             current_hour=next_hour
-        return slots
+            iterations += 1
+        slots.sort()
+        return slots #gérer les erreurs
 
     def getTodayAvailableTimes(self, table):
+        """#Rajae
+        Pré:
+            :param table: un objet de type Table qui contient une liste '_reservation' avec des objets de type Reservation ou chaque
+                    Reservation contient un attribut 'hour'
+        Post:
+            :return: Affiche des crénaux disponibles pour la table .
+        """
         open_morning=  time(10,0)
         close_morning= time(14,30)
         open_evening = time(18,0)
@@ -152,10 +174,10 @@ class Interface():
         evening_slots=self.generateTimeSlots(open_evening,close_evening,timedelta(minutes=90))
 
         current_time=datetime.now().time()
-        today = datetime.today.date()
+        today = datetime.today().date()
 
         reserved_slots=[ (reservation.hour , (datetime.combine(today, reservation.hour)+ timedelta(minutes=90)).time()) for reservation in table._reservations if reservation.date == today ]
-        available_slots=[ slot for slot in (morning_slots + evening_slots) if slot> current_time and not any(res[0]<= slot < res[1] for res in reserved_slots) ]
+        available_slots=[ slot for slot in (morning_slot + evening_slots) if slot> current_time and not any(res[0]<= slot < res[1] for res in reserved_slots) ]
 
         print(f"Créneaux disponibles pour la table {table.getId()} aujourd'hui ({today.strftime('%d/%m/%Y')}):")
         if available_slots:
@@ -166,6 +188,22 @@ class Interface():
 
 
     def check_table_status(self):
+        """ #Rajae
+        Pré: self._all_table est une liste contenant des objets de type Table.
+        -chaque objet Table doit avoir :
+            - une méthode gatState() qui retourne un état parti ['X','R','V']
+            - une méthode endTime() qui retourne qui retourne un datetime ou None
+            - une liste _reservations contenant des objets Reservation.
+        -chaque objet Reservation doit avoir :
+            - une méthode getHour() sui retourne un objet datetime.time
+            - une méthode getDate() qui retourne un objet datetime.date
+
+        Post :
+        -Génère une notification via self.notify(message) si :
+          - l'heure actuelle est exactement exacte à l'heure de la réservation
+          et la table concerné n'est pas occupée .
+          -une table occupée sera libre dans 15 minutes.
+        """
         current_time= datetime.now()
 
         for table in self._all_table:
@@ -186,11 +224,26 @@ class Interface():
         messagebox.showinfo("Notification de table", message)
 
 
+interface = Interface()
+
+for i in range(1, 21):
+    if i <= 10:
+        interface.addTable(Table(2))
+    elif i <= 16:
+        interface.addTable(Table(4))
+    else:
+        interface.addTable(Table(6))
+
+
+
+param = input("Sur place 'P' ou sur reservation 'R' : ")
+interface.makeReservation(param)
+
 """
 Note d'ajout: 
-- # la date proposer ne doit pas excéder 2mois
-- # Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
-- # Faire une fonction qui affiche les heures disponibles pour une tables choisis
+- #la date proposer ne doit pas excéder 2mois
+- #Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
+- #Faire une fonction qui affiche les heures disponibles pour une tables choisis
 - Faire une fonction qui affiche les listes des tables selon un format clair et bien visuelle
 - Dans makeReservation, faire en sorte d'ajouter la reservation à la table
 - # Faire le système de notification (flou)

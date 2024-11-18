@@ -37,14 +37,23 @@ class Table:
             return self._state
 
     def changeState(self, new_state):
-        if new_state in ['X', 'V', 'R']:  # 'X' = occupée, 'V' = disponible, 'R' = réservé
-            self._state = new_state
-            if new_state == 'X':
-                self.startTime()
-            elif new_state == 'V':
-                self.resetTime()
-            #elif new_state == 'R':
-                #self.startTime()
+        """#Rajae
+        Pré: param new_state: doit être une valeur valide parmi ['X', 'V', 'R']
+
+        Post:
+            return: le nouvel état de la table si la valeur est valide.
+            return: None si la valeur new_state est invalide.
+        """
+
+        if new_state not in ['X', 'V', 'R']:
+            return None # 'X' = occupée, 'V' = disponible, 'R' = réservé
+        self._state = new_state
+        if new_state == 'X':
+            self.startTime()
+        elif new_state == 'V':
+            self.resetTime()
+        #elif new_state == 'R':
+            #self.startTime()
         return new_state
     
     def addReservation(self, reservation):
@@ -59,6 +68,16 @@ class Table:
         self._start_time = datetime.now()
         
     def endTime(self):
+        """#Rajae
+        Pré:
+        -l'attribut self._star_time doit être un objet datetime qui représente le début d'occupation.
+
+        Post:
+        - return :  - un objet datetime si la table est occupée = self._star_time + 90
+                    - None si la table n'est pas occupée .
+
+
+        """
         if self._start_time is not None:
             return self._start_time + timedelta(minutes=90)
         return None
