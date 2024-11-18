@@ -75,8 +75,8 @@ class Table:
 
 
     def __str__(self):
-        return f"table {self.getId()}\n Nombre de place : {self.getSeat_nbr()}\n"
+        return f"table {self.getId()}"
     
     def __repr__(self):
-        return f"table {self.getId()}\n Nombre de place : {self.getSeat_nbr()}\n"
+        return f"table {self.getId()}"
     

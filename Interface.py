@@ -1,6 +1,5 @@
 from anyio import current_time
-
-from reservation import Reservation
+from Reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -90,7 +89,7 @@ class Interface():
             proposedTime = input("Entrée une heure valide sous le format hh:mm (ex:20:30) : ")  # à faire: ne pouvoir entrer des heures que si elles sont entre les crénaux de 10H - 14h30 et 18h - 22h30
             valid = re.match(formatTime, proposedTime)
             if valid:
-                proposedTime = datetime.strptime(proposedTime,"%H:%M").time()
+                proposedTime = datetime.strftime(proposedTime,"%H:%M").time()
         return proposedTime
     
     
@@ -106,7 +105,8 @@ class Interface():
         return proposedNumber
     
 
-    def makeReservation(self, typeReservation="P"):
+    def makeReservation(self):
+        typeReservation = input("Sur place 'P' ou sur reservation 'R' : ")
         reservationDate = date.today().strftime("%d/%m/%Y")
         reservationTime = datetime.now().strftime("%H:%M")
         reservationName = "defaultName"
@@ -148,7 +148,7 @@ class Interface():
         open_evening = time(18,0)
         close_evening= time(22,30)
 
-        morning_slot=self.generateTimeSlots(open_morning,close_morning,timedelta(minutes=90))
+        morning_slots=self.generateTimeSlots(open_morning,close_morning,timedelta(minutes=90))
         evening_slots=self.generateTimeSlots(open_evening,close_evening,timedelta(minutes=90))
 
         current_time=datetime.now().time()
@@ -186,29 +186,15 @@ class Interface():
         messagebox.showinfo("Notification de table", message)
 
 
-interface = Interface()
-
-for i in range(1, 21):
-    if i <= 10:
-        interface.addTable(Table(2))
-    elif i <= 16:
-        interface.addTable(Table(4))
-    else:
-        interface.addTable(Table(6))
-
-
-
-param = input("Sur place 'P' ou sur reservation 'R' : ")
-interface.makeReservation(param)
-
 """
 Note d'ajout: 
-- #la date proposer ne doit pas excéder 2mois
-- #Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
-- #Faire une fonction qui affiche les heures disponibles pour une tables choisis
+- # la date proposer ne doit pas excéder 2mois
+- # Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
+- # Faire une fonction qui affiche les heures disponibles pour une tables choisis
 - Faire une fonction qui affiche les listes des tables selon un format clair et bien visuelle
 - Dans makeReservation, faire en sorte d'ajouter la reservation à la table
-- #Faire le système de notification (flou)
+- # Faire le système de notification (flou)
 - Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
+- Permettre la gestion de chaises pour bébé (on peut supposer 8 chaises dans tout le restaurant)
 """

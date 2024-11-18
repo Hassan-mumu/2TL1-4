@@ -38,8 +38,7 @@ class Reservation :
         self._date = date 
 
     def __str__(self):
-        return f"Nom : {self.getName()}\nDate : {self.getDate()}\nHeure : {self.getHour()}"
+        return f"Nom : {self.getName()}\nTable(s) : {self.getTable()}\nDate : {self.getDate()}\nHeure : {self.getHour()}"
     
     def __repr__(self):
-        return f"Nom : {self.getName()}\nDate : {self.getDate()}\nHeure : {self.getHour()}"
-    
+        return f"Nom : {self.getName()}\nTable(s) : {self.getTable()}\nDate : {self.getDate()}\nHeure : {self.getHour()}"

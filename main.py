@@ -1,12 +1,28 @@
-
-
+# Importer les classes nécessaires
+from Interface import *  # Assurer que l'interface est correctement initialisée avec des tables
 import tkinter as tk
 
+#Constantes
 RED_COLOR = "indianred"
 DARK_CREAM_COLOR = "#FAF0E6"
 LIGHT_CREAM_COLOR = "#FFFAF0"
 POlICE = "Garamond"
+BTN_SIZE_X = 20
+BTN_SIZE_Y = 10
 
+
+#init
+interface = Interface()
+
+for i in range(1, 21):
+    if i <= 10:
+        interface.addTable(Table(2))
+    elif i <= 16:
+        interface.addTable(Table(4))
+    else:
+        interface.addTable(Table(6))
+
+interface.makeReservation()
 
 # Créer la fenêtre principale
 fenetre = tk.Tk()
@@ -14,10 +30,61 @@ fenetre.geometry("1920x1080")
 fenetre.title("La bonne fourchette")
 fenetre.configure(background=DARK_CREAM_COLOR, pady=20)
 
-# Fonction de commande du bouton
-def afficher_message(message):
-    # Exemple d'affichage dans la zone de droite
-    zone_affichage.config(text=message)
+# Méthodes
+
+# Fonction pour afficher les tables dans la frame de droite
+def afficher_tables():
+    # Effacer le contenu actuel de la zone d'affichage
+    for widget in frame_droite.winfo_children():
+        widget.destroy()
+    tables = interface._all_table
+    x = y = 0
+    
+    # Créer un cadre pour organiser les tables
+    for table in tables:
+        cadre_table = tk.Frame(frame_droite, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
+        cadre_table.grid(pady=10, padx=10, column=x, row=y)
+        if x == 3:
+            y +=1
+        x = (x + 1) % 4
+        # Informations sur la table
+        label_id = tk.Label(cadre_table, text=f"Table ID : {table.getId()}", font=(POlICE, 16), background="white")
+        label_id.pack(anchor="w", padx=10)
+        
+        label_places = tk.Label(cadre_table, text=f"Places : {table.getSeat_nbr()}", font=(POlICE, 16), background="white")
+        label_places.pack(anchor="w", padx=10)
+        
+        label_etat = tk.Label(cadre_table, text=f"État : {table.getState()}", font=(POlICE, 16), background="white")
+        label_etat.pack(anchor="w", padx=10)
+
+
+def afficher_reservation():
+    for widget in frame_droite.winfo_children():
+        widget.destroy()
+    reservations = interface._reservations_list
+    x = y = 0
+    
+    # Créer un cadre pour organiser les tables
+    for reservation in reservations:
+        cadre_table = tk.Frame(frame_droite, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
+        cadre_table.grid(pady=10, padx=10, column=x, row=y)
+        if x == 3:
+            y +=1
+        x = (x + 1) % 4
+
+        # Informations sur la table
+        label_id = tk.Label(cadre_table, text=f"Name : {reservation.getName()}", font=(POlICE, 16), background="white")
+        label_id.pack(anchor="w", padx=10)
+        
+        label_etat = tk.Label(cadre_table, text=f"Table(s) : {reservation.getTable()}", font=(POlICE, 16), background="white")
+        label_etat.pack(anchor="w", padx=10)
+
+        label_places = tk.Label(cadre_table, text=f"Date : {reservation.getDate()}", font=(POlICE, 16), background="white")
+        label_places.pack(anchor="w", padx=10)
+        
+        label_etat = tk.Label(cadre_table, text=f"Hour : {reservation.getHour()}", font=(POlICE, 16), background="white")
+        label_etat.pack(anchor="w", padx=10)
+
 
 # Titre de la partie gauche
 label_titre = tk.Label(fenetre, text="La Bonne Fourchette", font=(POlICE, 34, "bold"), background=DARK_CREAM_COLOR, anchor="w")
@@ -33,14 +100,6 @@ frame_gauche.pack_propagate(False)  # Fixer la taille
 frame_boutons = tk.Frame(frame_gauche, background=LIGHT_CREAM_COLOR)
 frame_boutons.pack(pady=20, padx=20, fill="y")
 
-# Ajouter les boutons dans frame_boutons
-for i in range(4):
-    bouton = tk.Button(
-        frame_boutons, text=f"Bouton {i+1}", font=(POlICE, 18), width=20, background=RED_COLOR,
-        command=lambda i=i: afficher_message(f"Vous avez cliqué sur le bouton {i+1}")
-    )
-    bouton.pack(pady=20, padx=10, fill="x")
-
 # Ligne de séparation
 ligne_separation = tk.Frame(fenetre, width=5, background="white")
 ligne_separation.pack(side="left", fill="y")
@@ -53,6 +112,22 @@ frame_droite.pack_propagate(False)  # Fixer la taille
 # Zone de texte affichant le message
 zone_affichage = tk.Label(frame_droite, text="", font=("Garamond", 20), background="#FFF5EE", justify="center")
 zone_affichage.pack(pady=20, padx=20, anchor="center")
+
+
+# bouton pour afficher les tables
+bouton = tk.Button(
+    frame_boutons, text="Afficher les Tables", font=(POlICE, 18),  height=BTN_SIZE_Y, width=BTN_SIZE_X, background=RED_COLOR,
+    command=afficher_tables
+)
+bouton.grid(pady=20, padx=10, row=0, column=0)
+
+# bouton pour afficher les réservations
+bouton = tk.Button(
+    frame_boutons, text="Afficher les Reservations", font=(POlICE, 18) , height=BTN_SIZE_Y, width=BTN_SIZE_X, background=RED_COLOR,
+    command=afficher_reservation
+)
+bouton.grid(pady=20, padx=10, row=0, column=1)
+
 
 # Lancer la boucle principale de la fenêtre
 fenetre.mainloop()
