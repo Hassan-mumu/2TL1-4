@@ -11,7 +11,7 @@ BTN_SIZE_X = 20
 BTN_SIZE_Y = 10
 
 
-#init
+# test init
 interface = Interface()
 
 for i in range(1, 21):
@@ -131,3 +131,16 @@ bouton.grid(pady=20, padx=10, row=0, column=1)
 
 # Lancer la boucle principale de la fenêtre
 fenetre.mainloop()
+
+
+"""
+Note d'ajout: 
+- Dans makeReservation, faire en sorte d'ajouter la reservation à la table
+- Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
+- Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
+- Permettre la gestion de chaises pour bébé (on peut supposer 8 chaises dans tout le restaurant)
+- enregistrer l'état des tables à la fin du programmes dans un fichier json ou dans une base de données
+- charger les tables depuis un fichier json qui contient l'etat des tables pré-existantes ou charger les tables depuis une base de donnée
+- ajouter setter et properties aux classes
+- restructurer le code (le rendre plus lisibles, séparer les constantes, les imports, les getter/setter et les méthodes dans différentes sections pour chaque fichier)
+"""

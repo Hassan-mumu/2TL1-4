@@ -1,6 +1,6 @@
 from anyio import current_time
-
-from reservation import Reservation
+from tkinter import messagebox
+from Reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -121,18 +121,15 @@ class Interface():
         self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
         print(f"La table à été assigné : {reservationTable} \n{self._reservations_list[-1]}\n")
 
-    def sortTablesByAvailability(self, tables):
-            tables.sort(key=lambda table: len(table.reservations))
-
     def __str__(self):
         return f"{self._all_table}"
     
     def __repr__(self):
         return f"{self._all_table}"
 
-    #def sortTablesByAvailability(self, tables):
-        #tables.sort(key=lambda table: len(table._reservations))
-        #return tables
+    def sortTablesByAvailability(self, tables):
+        tables.sort(key=lambda table: len(table._reservations))
+        return tables
 
     def generateTimeSlots(self,start,end,duration):
         """#Rajae
@@ -177,7 +174,7 @@ class Interface():
         today = datetime.today().date()
 
         reserved_slots=[ (reservation.hour , (datetime.combine(today, reservation.hour)+ timedelta(minutes=90)).time()) for reservation in table._reservations if reservation.date == today ]
-        available_slots=[ slot for slot in (morning_slot + evening_slots) if slot> current_time and not any(res[0]<= slot < res[1] for res in reserved_slots) ]
+        available_slots=[ slot for slot in (morning_slots + evening_slots) if slot> current_time and not any(res[0]<= slot < res[1] for res in reserved_slots) ]
 
         print(f"Créneaux disponibles pour la table {table.getId()} aujourd'hui ({today.strftime('%d/%m/%Y')}):")
         if available_slots:
@@ -224,29 +221,9 @@ class Interface():
         messagebox.showinfo("Notification de table", message)
 
 
-interface = Interface()
-
-for i in range(1, 21):
-    if i <= 10:
-        interface.addTable(Table(2))
-    elif i <= 16:
-        interface.addTable(Table(4))
-    else:
-        interface.addTable(Table(6))
-
-
-
-param = input("Sur place 'P' ou sur reservation 'R' : ")
-interface.makeReservation(param)
-
 """
 Note d'ajout: 
-- #la date proposer ne doit pas excéder 2mois
-- #Faire une fonction qu trie les listes des tables par les tables les plus disponibles aux moins disponibles
-- #Faire une fonction qui affiche les heures disponibles pour une tables choisis
-- Faire une fonction qui affiche les listes des tables selon un format clair et bien visuelle
 - Dans makeReservation, faire en sorte d'ajouter la reservation à la table
-- # Faire le système de notification (flou)
 - Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
 - Permettre la gestion de chaises pour bébé (on peut supposer 8 chaises dans tout le restaurant)
