@@ -291,17 +291,3 @@ Note d'ajout:
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
 - Permettre la gestion de chaises pour bébé (on peut supposer 8 chaises dans tout le restaurant)
 """
-# ton code actuel...
-
-if __name__ == '__main__':
-    # Créer des instances de Table pour le test
-    table1 = Table(4, 'V')
-    table2 = Table(6, 'V')
-
-    # Créer une instance d'Interface avec les tables
-    interface = Interface(table1, table2)
-
-    # Appeler la méthode makeReservation pour tester
-    interface.makeReservation()
-
-    # Ajouter d'autres appels de méthode pour tester d'autres fonctionnalités
