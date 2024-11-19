@@ -61,6 +61,13 @@ class Table:
             self._reservations.append(reservation)
 
     def removeReservation(self, reservation):
+        """
+          #Loyde 
+          PRE : - reservation est un objet de Reservation. 
+                - self._reservations doit contenir l'objet reservation. 
+          
+          POST : - La réservation est retirée de la liste self._reservations si elle s'y trouve. 
+        """
         if reservation in self._reservations:
             self._reservations.remove(reservation)
 

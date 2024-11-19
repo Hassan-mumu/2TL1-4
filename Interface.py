@@ -17,6 +17,12 @@ class Interface():
     
 
     def addTable(self, table):
+        """
+        # Loyde  
+        PRE : table est un objet de type 'Table'
+        
+        POST : Chaque table est ajoutée aux listes self._available_table et self._all_table uniquement si son état est 'Disponible' (état qui est indiqué par 'V').
+        """
         if isinstance(table, Table):
             table = [table]
         for tab in table:
@@ -30,6 +36,15 @@ class Interface():
 
 
     def filterByDateTime(self,date, heure ,table_list):
+        """
+        #Loyde  
+        PRE : - date est un objet de datetime.date
+              - heure est un objet de datetime.time 
+              - table_list est une liste qui contient des objets de type Table ou None 
+        
+        POST : Retourne une liste de tables disponibles à la date et à l'heure indiquées.
+        
+        """
         if table_list == None:
             table_list = self._all_table
 
@@ -48,6 +63,14 @@ class Interface():
 
 
     def filterBySeats(self, seats : int, table_list=None):
+        """ 
+        #Loyde  
+        PRE : - seats est un entier positif qui représente le nombre de sièges nécessaires. 
+              - table_list est une liste qui contient des objets de type Table. 
+                Si table_list n'est pas fourni (donc None), la fonction utilisera self._all_table.
+        
+        POST : - Retourne une liste de tables disponible avec au moins le nombre de sièges indiqué par seats. 
+        """
         if table_list == None:
             table_list = self._all_table
         cpy_list = [table for table in table_list if table._seat_nbr >= seats]
@@ -62,6 +85,14 @@ class Interface():
 
 
     def askDate(self):
+        """
+        # Loyde 
+        PRE : - La date entrée doit être dans le format `dd/mm/yyyy`
+              - La date doit être comprise entre aujourd'hui et dans 60 jours maximum (c'est à dire 2 mois maximum) à partir d'aujourd'hui. 
+        
+        POST : Retourne un objet de type datetime.date qui repésente la date valide entrée par l'utilisateur.
+        """
+
         valid = False
         formatDate = r"^\d{2}/\d{2}/\d{4}$"
         proposedDate = ""
