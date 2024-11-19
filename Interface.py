@@ -1,6 +1,6 @@
 from anyio import current_time
 from tkinter import messagebox
-from Reservation import Reservation
+from reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -14,6 +14,8 @@ class Interface():
         self._occupied_table = []
         self._reservations_list = []
         self.__password = 0000
+        self._baby_chairs_total = 8 
+        self._baby_chairs_available = 8 
     
 
     def addTable(self, table):
@@ -118,11 +120,12 @@ class Interface():
         formatTime = r"^\d{2}:\d{2}$"
         proposedTime = ""
         while not valid:
-            proposedTime = input("Entrée une heure valide sous le format hh:mm (ex:20:30) : ")  # à faire: ne pouvoir entrer des heures que si elles sont entre les crénaux de 10H - 14h30 et 18h - 22h30
+            proposedTime = input("Entrée une heure valide sous le format hh:mm (ex:20:30) : ")
             valid = re.match(formatTime, proposedTime)
             if valid:
-                proposedTime = datetime.strftime(proposedTime,"%H:%M").time()
-        return proposedTime
+                proposedTime = datetime.strptime(proposedTime, "%H:%M").time()
+            return proposedTime
+
     
     
     def askSeats(self):
@@ -136,6 +139,16 @@ class Interface():
 
         return proposedNumber
     
+    def askBabySeat(self) : 
+        valid = False 
+        proposedNumber = 0 
+        while not valid :
+            proposedNumber = input("Combien de chaises pour bébé avez-vous besoin (entre 1 et 8) : ")
+            if proposedNumber.isdigit() : 
+                proposedNumber = int(proposedNumber)
+                valid = 0 < proposedNumber <= 8
+        return proposedNumber
+    
 
     def makeReservation(self):
         typeReservation = input("Sur place 'P' ou sur reservation 'R' : ")
@@ -146,8 +159,27 @@ class Interface():
             reservationDate = self.askDate()
             reservationTime = self.askTime()
             reservationName = input("Entrée un nom pour la réservation : ")
-
+        
+        
         reservationSeats = self.askSeats()
+        
+        babySeatWanted = input("Avez-vous besoin de chaises pour bébé ? (oui/non) : ").strip().lower() == "oui" 
+        babySeatCount = 0 
+
+        if babySeatWanted: 
+            if self._baby_chairs_available == 0: 
+                print("Désolé, il n'y a plus de chaises pour bébé disponibles.") 
+                return 
+            else: 
+                babySeatCount = self.askBabySeat() 
+                if babySeatCount > self._baby_chairs_available: 
+                        print(f"Désolé, il n'y a plus assez de chaises pour bébé disponibles. Il reste seulement {self._baby_chairs_available} chaise(s) pour bébé.") 
+                        return 
+                else: # Réserver les chaises pour bébé 
+                    self._baby_chairs_available -= babySeatCount 
+                    print(f"{babySeatCount} chaises pour bébé réservées.")
+                    print(f"Il reste {self._baby_chairs_available} pour bébé disponibles")
+
         reservationTable = self.filterBySeats(reservationSeats,self.filterByDateTime(reservationDate, reservationTime, self._all_table))[0]
         self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
         print(f"La table à été assigné : {reservationTable} \n{self._reservations_list[-1]}\n")
@@ -259,3 +291,17 @@ Note d'ajout:
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
 - Permettre la gestion de chaises pour bébé (on peut supposer 8 chaises dans tout le restaurant)
 """
+# ton code actuel...
+
+if __name__ == '__main__':
+    # Créer des instances de Table pour le test
+    table1 = Table(4, 'V')
+    table2 = Table(6, 'V')
+
+    # Créer une instance d'Interface avec les tables
+    interface = Interface(table1, table2)
+
+    # Appeler la méthode makeReservation pour tester
+    interface.makeReservation()
+
+    # Ajouter d'autres appels de méthode pour tester d'autres fonctionnalités
