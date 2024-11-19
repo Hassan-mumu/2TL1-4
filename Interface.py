@@ -178,7 +178,7 @@ class Interface():
                 else: # Réserver les chaises pour bébé 
                     self._baby_chairs_available -= babySeatCount 
                     print(f"{babySeatCount} chaises pour bébé réservées.")
-                    print(f"Il reste {self._baby_chairs_available} pour bébé disponibles")
+                    print(f"Il reste {self._baby_chairs_available} chaises pour bébé disponibles")
 
         reservationTable = self.filterBySeats(reservationSeats,self.filterByDateTime(reservationDate, reservationTime, self._all_table))[0]
         self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
