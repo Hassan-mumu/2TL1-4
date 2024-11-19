@@ -165,7 +165,7 @@ class Interface():
     def generateTimeSlots(self,start,end,duration):
         """#Rajae
         Pré:
-        :param start: un objet de datetime.time qui représente l'heyre de début.
+        :param start: un objet de datetime.time qui représente l'heure de début.
         :param end: un objet de datetime.time qui représente l'heure de fin (start < end)
         :param duration: un objet de type de datetime.timedelta qui repéresente la durée entre deux crénaux (start et end)
 
