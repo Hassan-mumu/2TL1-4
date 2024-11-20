@@ -9,6 +9,8 @@ LIGHT_CREAM_COLOR = "#FFFAF0"
 POlICE = "Garamond"
 BTN_SIZE_X = 20
 BTN_SIZE_Y = 10
+EMPTY_TABLE = "Pas de table disponible."
+EMPTY_RESERVATION = "Pas de réservations"
 
 
 # test init
@@ -30,60 +32,134 @@ fenetre.geometry("1920x1080")
 fenetre.title("La bonne fourchette")
 fenetre.configure(background=DARK_CREAM_COLOR, pady=20)
 
+
 # Méthodes
 
-# Fonction pour afficher les tables dans la frame de droite
-def afficher_tables():
-    # Effacer le contenu actuel de la zone d'affichage
+# Méthodes
+
+def configurer_scrollable_frame():
+    """Configure le canvas et le frame scrollable de la frame de droite."""
+    global canvas, scrollbar, scrollable_frame
     for widget in frame_droite.winfo_children():
         widget.destroy()
-    tables = interface._all_table
-    x = y = 0
-    
-    # Créer un cadre pour organiser les tables
-    for table in tables:
-        cadre_table = tk.Frame(frame_droite, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
-        cadre_table.grid(pady=10, padx=10, column=x, row=y)
-        if x == 3:
-            y +=1
+
+    canvas = tk.Canvas(frame_droite, background=LIGHT_CREAM_COLOR)
+    scrollbar = tk.Scrollbar(frame_droite, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, background=LIGHT_CREAM_COLOR)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+
+def afficher_details_table(cadre, table):
+    """Affiche les informations d'une table dans le cadre donné."""
+    tk.Label(cadre, text=f"Table ID : {table.getId()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    tk.Label(cadre, text=f"Places : {table.getSeat_nbr()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    tk.Label(cadre, text=f"État : {table.getState()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+
+def afficher_details_reservation(cadre, reservation):
+    tk.Label(cadre, text=f"Name : {reservation.getName()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    tk.Label(cadre, text=f"Table(s) : {reservation.getTable()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    tk.Label(cadre, text=f"Date : {reservation.getDate()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    tk.Label(cadre, text=f"Hour : {reservation.getHour()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+
+def afficher_boutons_options(cadre, table : Table):
+    """Affiche les boutons Réserver et Voir Réservations dans le cadre donné."""
+    tk.Button(
+        cadre, text="Réserver", font=(POlICE, 14), background="lightgreen",
+        command=lambda: reserver_table(table)
+    ).pack(pady=5, padx=10, anchor="w")
+
+    tk.Button(
+        cadre, text="Voir Réservations", font=(POlICE, 14), background="lightblue",
+        command=lambda: afficher_reservations(table.getReservations())
+    ).pack(pady=5, padx=10, anchor="w")
+
+
+def afficher_tables(liste_table):
+    """Affiche la liste des tables avec une grille et une scrollbar."""
+    configurer_scrollable_frame()
+    x, y = 0, 0
+
+    if liste_table == []:
+        displayEmpty(scrollable_frame, EMPTY_TABLE )
+    else:
+        for table in liste_table:
+            cadre_table = tk.Frame(scrollable_frame, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
+            cadre_table.grid(pady=10, padx=10, column=x, row=y)
+
+            afficher_details_table(cadre_table, table)
+
+            cadre_table.bind("<Button-1>", lambda event, ct=cadre_table, t=table: basculer_options_table(ct, t))
+            
+            if x == 3:  # 4 colonnes par ligne
+                y += 1
+            x = (x + 1) % 4
+
+
+def afficher_reservations(liste_reservation):
+    """Affiche la liste des réservations avec une grille et une scrollbar."""
+    configurer_scrollable_frame()
+    x, y = 0, 0
+
+    if liste_reservation == []:
+        displayEmpty(scrollable_frame, EMPTY_RESERVATION )
+    else:
+
+        for reservation in liste_reservation:
+            cadre_reservation = tk.Frame(scrollable_frame, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
+            cadre_reservation.grid(pady=10, padx=10, column=x, row=y)
+
+            afficher_details_reservation(cadre_reservation, reservation)
+            
+        if x == 3:  # 4 colonnes par ligne
+            y += 1
         x = (x + 1) % 4
-        # Informations sur la table
-        label_id = tk.Label(cadre_table, text=f"Table ID : {table.getId()}", font=(POlICE, 16), background="white")
-        label_id.pack(anchor="w", padx=10)
-        
-        label_places = tk.Label(cadre_table, text=f"Places : {table.getSeat_nbr()}", font=(POlICE, 16), background="white")
-        label_places.pack(anchor="w", padx=10)
-        
-        label_etat = tk.Label(cadre_table, text=f"État : {table.getState()}", font=(POlICE, 16), background="white")
-        label_etat.pack(anchor="w", padx=10)
 
 
-def afficher_reservation():
-    for widget in frame_droite.winfo_children():
-        widget.destroy()
-    reservations = interface._reservations_list
-    x = y = 0
-    
-    # Créer un cadre pour organiser les tables
-    for reservation in reservations:
-        cadre_table = tk.Frame(frame_droite, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
-        cadre_table.grid(pady=10, padx=10, column=x, row=y)
-        if x == 3:
-            y +=1
-        x = (x + 1) % 4
+def basculer_options_table(cadre_table, table):
+    """Affiche ou masque les options d'une table dans son cadre."""
+    if any(isinstance(widget, tk.Button) for widget in cadre_table.winfo_children()):
+        # Si les options sont présentes, réaffiche seulement les détails
+        for widget in cadre_table.winfo_children():
+            widget.destroy()
+        afficher_details_table(cadre_table, table)
+    else:
+        # Sinon, affiche les options
+        for widget in cadre_table.winfo_children():
+            widget.destroy()
+        afficher_details_table(cadre_table, table)
+        afficher_boutons_options(cadre_table, table)
 
-        # Informations sur la table
-        label_id = tk.Label(cadre_table, text=f"Name : {reservation.getName()}", font=(POlICE, 16), background="white")
-        label_id.pack(anchor="w", padx=10)
-        
-        label_etat = tk.Label(cadre_table, text=f"Table(s) : {reservation.getTable()}", font=(POlICE, 16), background="white")
-        label_etat.pack(anchor="w", padx=10)
+def displayEmpty(parent_frame, message):
+    """Affiche un message indiquant qu'il n'y a pas de données à afficher."""
+    tk.Label(
+        parent_frame,
+        text=message,
+        font=(POlICE, 20),
+        background=LIGHT_CREAM_COLOR,
+        justify="center"
+    ).pack(pady=20, padx=20, anchor="center")
 
-        label_places = tk.Label(cadre_table, text=f"Date : {reservation.getDate()}", font=(POlICE, 16), background="white")
-        label_places.pack(anchor="w", padx=10)
-        
-        label_etat = tk.Label(cadre_table, text=f"Hour : {reservation.getHour()}", font=(POlICE, 16), background="white")
-        label_etat.pack(anchor="w", padx=10)
+
+def reserver_table(table):
+    """Action pour réserver une table."""
+    interface.reserveTable(Table)
+    print(f"Réserver la table {table.getId()}")
+
+
+def voir_reservations(table : Table):
+    """Action pour voir les réservations d'une table."""
+    afficher_reservations(table.getReservations())
+    print(f"Voir les réservations de la table {table.getId()}")
+
 
 
 # Titre de la partie gauche
@@ -109,6 +185,21 @@ frame_droite = tk.Frame(fenetre, width=0.55*1920, background=LIGHT_CREAM_COLOR)
 frame_droite.pack(side="left", fill="both", padx=50, expand=True)
 frame_droite.pack_propagate(False)  # Fixer la taille
 
+canvas = tk.Canvas(frame_droite, background=LIGHT_CREAM_COLOR)
+scrollbar = tk.Scrollbar(frame_droite, orient="vertical", command=canvas.yview)
+scrollable_frame = tk.Frame(canvas, background=LIGHT_CREAM_COLOR)
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+)
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+# Placer le canvas et la scrollbar
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
 # Zone de texte affichant le message
 zone_affichage = tk.Label(frame_droite, text="", font=("Garamond", 20), background="#FFF5EE", justify="center")
 zone_affichage.pack(pady=20, padx=20, anchor="center")
@@ -117,14 +208,14 @@ zone_affichage.pack(pady=20, padx=20, anchor="center")
 # bouton pour afficher les tables
 bouton = tk.Button(
     frame_boutons, text="Afficher les Tables", font=(POlICE, 18),  height=BTN_SIZE_Y, width=BTN_SIZE_X, background=RED_COLOR,
-    command=afficher_tables
+    command= lambda : afficher_tables(interface._all_table)
 )
 bouton.grid(pady=20, padx=10, row=0, column=0)
 
 # bouton pour afficher les réservations
 bouton = tk.Button(
     frame_boutons, text="Afficher les Reservations", font=(POlICE, 18) , height=BTN_SIZE_Y, width=BTN_SIZE_X, background=RED_COLOR,
-    command=afficher_reservation
+    command=lambda : afficher_reservations(interface._reservations_list)
 )
 bouton.grid(pady=20, padx=10, row=0, column=1)
 
@@ -132,10 +223,8 @@ bouton.grid(pady=20, padx=10, row=0, column=1)
 # Lancer la boucle principale de la fenêtre
 fenetre.mainloop()
 
-
 """
 Note d'ajout: 
-- Dans makeReservation, faire en sorte d'ajouter la reservation à la table
 - Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
 - enregistrer l'état des tables à la fin du programmes dans un fichier json ou dans une base de données

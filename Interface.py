@@ -1,6 +1,6 @@
 from anyio import current_time
 from tkinter import messagebox
-from reservation import Reservation
+from Reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -181,7 +181,9 @@ class Interface():
                     print(f"Il reste {self._baby_chairs_available} chaises pour bébé disponibles")
 
         reservationTable = self.filterBySeats(reservationSeats,self.filterByDateTime(reservationDate, reservationTime, self._all_table))[0]
-        self._reservations_list.append(Reservation(reservationTable,reservationTime, reservationDate, reservationName))
+        reservation = Reservation(reservationTable,reservationTime, reservationDate, reservationName)
+        self._reservations_list.append(reservation)
+        reservationTable.addReservation(reservation)
         print(f"La table à été assigné : {reservationTable} \n{self._reservations_list[-1]}\n")
 
     def __str__(self):
@@ -282,6 +284,15 @@ class Interface():
     def notify(self, message):
         # Affiche une notification dans une boîte de dialogue
         messagebox.showinfo("Notification de table", message)
+
+    def reserveTable(self):
+        print(self._available_table)
+        tId = int(input("Choose a Table number : "))
+        tab = [table for table in self._available_table if table.getId() == tId][0]
+        print(tab)
+        r = Reservation(tab)
+        tab.addReservation(r)
+        self._reservations_list.append(r)
 
 
 """

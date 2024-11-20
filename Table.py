@@ -56,8 +56,11 @@ class Table:
             #self.startTime()
         return new_state
     
+    def getReservations(self):
+        return self._reservations
+    
     def addReservation(self, reservation):
-        if reservation not in self._reservations:
+        if reservation not in self.getReservations():
             self._reservations.append(reservation)
 
     def removeReservation(self, reservation):
@@ -106,3 +109,6 @@ class Table:
     def __repr__(self):
         return f"table {self.getId()}"
     
+    def __eq__(self, table):
+        if isinstance(table, Table):
+            return self.getId() == table.getId()
