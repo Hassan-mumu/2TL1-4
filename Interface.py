@@ -1,6 +1,6 @@
 from anyio import current_time
 from tkinter import messagebox
-from Reservation import Reservation
+from reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -15,8 +15,10 @@ class Interface():
         self._reservations_list = []
         self.__password = 0000
         self._baby_chairs_total = 8 
-        self._baby_chairs_available = 8 
-    
+        self._baby_chairs_available = 8
+        self.notifications = []
+
+
 
     def addTable(self, table):
         """
@@ -283,6 +285,8 @@ class Interface():
 
     def notify(self, message):
         # Affiche une notification dans une boîte de dialogue
+        timestamp = datetime.now()
+        self.notifications.append((timestamp, message))
         messagebox.showinfo("Notification de table", message)
 
     def reserveTable(self):
@@ -293,6 +297,12 @@ class Interface():
         r = Reservation(tab)
         tab.addReservation(r)
         self._reservations_list.append(r)
+
+    def clean_old_notifications(self):
+        """Supprime les notifications vieilles de plus d'une heure."""
+        one_hour_ago = datetime.now() - timedelta(hours=1)
+        self.notifications = [(time, msg) for time, msg in self.notifications if time > one_hour_ago]
+
 
 
 """

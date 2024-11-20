@@ -7,8 +7,8 @@ RED_COLOR = "indianred"
 DARK_CREAM_COLOR = "#FAF0E6"
 LIGHT_CREAM_COLOR = "#FFFAF0"
 POlICE = "Garamond"
-BTN_SIZE_X = 20
-BTN_SIZE_Y = 10
+BTN_SIZE_X = 15 #20
+BTN_SIZE_Y = 5 #10
 EMPTY_TABLE = "Pas de table disponible."
 EMPTY_RESERVATION = "Pas de réservations"
 
@@ -161,6 +161,27 @@ def voir_reservations(table : Table):
     print(f"Voir les réservations de la table {table.getId()}")
 
 
+def verifier_et_notifier():
+    """Vérifie les tables et affiche des notifications si nécessaire."""
+    interface.check_table_status()
+    fenetre.after(60000, verifier_et_notifier)
+
+def afficher_notifications_recues():
+    """Affiche les notifications reçues dans la dernière heure."""
+    interface.clean_old_notifications()  # Nettoie les anciennes notifications
+    configurer_scrollable_frame()
+    if not interface.notifications:
+        displayEmpty(scrollable_frame, "Aucune notification récente.")
+    else:
+        for timestamp, message in interface.notifications:
+            tk.Label(
+                scrollable_frame,
+                text=f"{timestamp.strftime('%H:%M:%S')} - {message}",
+                font=(POlICE, 14),
+                background="white",
+                justify="left"
+            ).pack(anchor="w", pady=5, padx=10)
+
 
 # Titre de la partie gauche
 label_titre = tk.Label(fenetre, text="La Bonne Fourchette", font=(POlICE, 34, "bold"), background=DARK_CREAM_COLOR, anchor="w")
@@ -219,7 +240,16 @@ bouton = tk.Button(
 )
 bouton.grid(pady=20, padx=10, row=0, column=1)
 
-
+tk.Button(
+    frame_boutons,
+    text="Afficher Notifications",
+    font=(POlICE, 18),
+    height=BTN_SIZE_Y,
+    width=BTN_SIZE_X,
+    background="lightcoral",
+    command=afficher_notifications_recues
+).grid(pady=20, padx=10, row=0, column=2)
+verifier_et_notifier()
 # Lancer la boucle principale de la fenêtre
 fenetre.mainloop()
 
