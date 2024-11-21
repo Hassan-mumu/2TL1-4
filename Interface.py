@@ -1,6 +1,6 @@
 from anyio import current_time
 from tkinter import messagebox
-from reservation import Reservation
+from Reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -59,6 +59,15 @@ class Interface():
 
 
     def isReservable(self, res, suggested_res ):
+        """
+        #Hassan 
+        PRE:
+        - res doit etre de type Reservation
+        - suggested_res doit etre un tuple de deux valeurs, le premier indice est l'heure de type datetime et le deuxième du meme type
+        POST:
+        - Renvoie un booléen si la date suggéré est inférieur ou égal à 90 minutes et qu'elle respecte les préconditions
+        - soulève une erreur sinon 
+        """
         res_hour = res.getHeure()
         res_date = res.getDate()
         sug_hour = suggested_res[0]
@@ -118,6 +127,11 @@ class Interface():
 
 
     def askTime(self):
+        """
+        PRE: - 
+        POST:
+        - renvoie un temps de type date time selon le bon format, et redemande au cas où le format n'a pas été bien entrée
+        """
         valid = False
         formatTime = r"^\d{2}:\d{2}$"
         proposedTime = ""
@@ -127,10 +141,16 @@ class Interface():
             if valid:
                 proposedTime = datetime.strptime(proposedTime, "%H:%M").time()
             return proposedTime
-
     
     
     def askSeats(self):
+        """#Hassan
+        PRE:
+        - 
+        POST:
+        - renvoie un nombre valide de chaise à entrer et recommence si le nombre de chaise entrée n'est 
+            pas entre 1 et 12
+        """
         valid = False
         proposedNumber = 0
         while not valid :
@@ -141,7 +161,15 @@ class Interface():
 
         return proposedNumber
     
+
     def askBabySeat(self) : 
+        """#Hassan
+        PRE:
+        - 
+        POST:
+        - renvoie un nombre valide de chaise à entrer et recommence si le nombre de chaise entrée n'est 
+            pas entre 1 et 8
+        """
         valid = False 
         proposedNumber = 0 
         while not valid :
@@ -195,6 +223,15 @@ class Interface():
         return f"{self._all_table}"
 
     def sortTablesByAvailability(self, tables):
+        """#Hassan
+        PRE:
+        - tables doit etre une liste de Tables
+        - tables ne doit pas etre vides
+        POST:
+        - renvoie la liste de Table trié par disponibilité selon le nombre de réservation qu'elle possède
+        - renvoie une liste vide si il n'y a rien dans la liste ou soulève une erreur si ce n'est pas une liste de table
+        
+        """
         tables.sort(key=lambda table: len(table._reservations))
         return tables
 
@@ -290,6 +327,12 @@ class Interface():
         messagebox.showinfo("Notification de table", message)
 
     def reserveTable(self):
+        """#Hassan
+        PRE:
+        - self.available_table doit etre une liste de table non vide
+        POST:
+        - Crée une reservation, Ajoute la reservation à la table et à la liste des réservations de l'interface         
+        """
         print(self._available_table)
         tId = int(input("Choose a Table number : "))
         tab = [table for table in self._available_table if table.getId() == tId][0]
