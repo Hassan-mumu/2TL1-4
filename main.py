@@ -11,8 +11,8 @@ RED_COLOR = "indianred"
 DARK_CREAM_COLOR = "#FAF0E6"
 LIGHT_CREAM_COLOR = "#FFFAF0"
 POlICE = "Garamond"
-BTN_SIZE_X = 20
-BTN_SIZE_Y = 10
+BTN_SIZE_X = 15 #20
+BTN_SIZE_Y = 5 #10
 EMPTY_TABLE = "Pas de table disponible."
 EMPTY_RESERVATION = "Pas de réservations"
 
@@ -243,6 +243,20 @@ def displayEmpty(parent_frame, message):
         justify="center"
     ).pack(pady=20, padx=20, anchor="center")
 
+
+def reserver_table(table):
+    """Action pour réserver une table."""
+    interface.reserveTable(Table)
+    print(f"Réserver la table {table.getId()}")
+
+
+def voir_reservations(table : Table):
+    """Action pour voir les réservations d'une table."""
+    afficher_reservations(table.getReservations())
+    print(f"Voir les réservations de la table {table.getId()}")
+
+
+
 # Titre de la partie gauche
 label_titre = Label(fenetre, text="La Bonne Fourchette", font=(POlICE, 34, "bold"), background=DARK_CREAM_COLOR, anchor="w")
 label_titre.pack(pady=(10, 0), padx=(50, 0), anchor="nw")  # Ancrer en haut à gauche
@@ -300,7 +314,16 @@ bouton = Button(
 )
 bouton.grid(pady=20, padx=10, row=0, column=1)
 
-
+tk.Button(
+    frame_boutons,
+    text="Afficher Notifications",
+    font=(POlICE, 18),
+    height=BTN_SIZE_Y,
+    width=BTN_SIZE_X,
+    background="lightcoral",
+    command=afficher_notifications_recues
+).grid(pady=20, padx=10, row=0, column=2)
+verifier_et_notifier()
 # Lancer la boucle principale de la fenêtre
 fenetre.mainloop()
 
