@@ -1,12 +1,14 @@
-# Importer les classes nécessaires
+
+#----------------------------------------------------------------IMPORTS-----------------------------------------------------------------------------#
+
 from Interface import *  # Assurer que l'interface est correctement initialisée avec des tables
 from tkinter import *
 from tkinter import ttk
 from tkcalendar import Calendar
 from datetime import datetime, timedelta
 
+#----------------------------------------------------------------NOTIFICATION-----------------------------------------------------------------------------#
 
-#Constantes
 RED_COLOR = "indianred"
 DARK_CREAM_COLOR = "#FAF0E6"
 LIGHT_CREAM_COLOR = "#FFFAF0"
@@ -16,8 +18,8 @@ BTN_SIZE_Y = 10
 EMPTY_TABLE = "Pas de table disponible."
 EMPTY_RESERVATION = "Pas de réservations"
 
+#----------------------------------------------------------------CHARGEMENT DES DONNEES-----------------------------------------------------------------------------#
 
-# test init
 interface = Interface()
 
 for i in range(1, 21):
@@ -39,125 +41,25 @@ fenetre.configure(background=DARK_CREAM_COLOR, pady=20)
 selected_date = None
 selected_time = None
 
-def reserver_table(table : Table):
-    """Affiche un écran pour sélectionner la date et l'heure de réservation."""
+#----------------------------------------------------------------RESERVATIONS-----------------------------------------------------------------------------#
+
+def afficher_reservations(liste_reservation):
+    """Affiche la liste des réservations avec une grille et une scrollbar."""
     configurer_scrollable_frame()
+    x, y = 0, 0
 
-    Label(
-        scrollable_frame,
-        text=f"Réserver pour la Table {table.getId()}",
-        font=(POlICE, 20, "bold"),
-        background=LIGHT_CREAM_COLOR
-    ).pack(pady=20)
+    if liste_reservation == []:
+        displayEmpty(scrollable_frame, EMPTY_RESERVATION )
+    else:
+        for reservation in liste_reservation:
+            cadre_reservation = Frame(scrollable_frame, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
+            cadre_reservation.grid(pady=10, padx=10, column=x, row=y)
 
-    # Sélection de la date
-    Label(scrollable_frame, text="Choisissez une date :", font=(POlICE, 16), background=LIGHT_CREAM_COLOR).pack(pady=10)
-    cal = Calendar(scrollable_frame, selectmode="day", mindate=datetime.now(), maxdate=datetime.now() + timedelta(days=60))
-    cal.pack(pady=10)
-
-    # Sélection des heures
-    Label(scrollable_frame, text="Choisissez une heure :", font=(POlICE, 16), background=LIGHT_CREAM_COLOR).pack(pady=10)
-    frame_heures = Frame(scrollable_frame, background=LIGHT_CREAM_COLOR)
-    frame_heures.pack()
-
-    time_slots = generate_time_slots()
-    selected_time_var = StringVar(value="")  # Variable pour suivre le créneau sélectionné
-    for slot in time_slots:
-        ttk.Radiobutton(
-            frame_heures,
-            text=slot,
-            variable=selected_time_var,
-            value=slot,
-            style="TRadiobutton"
-        ).pack(side="left", padx=5, pady=5)
-
-    # Bouton de validation
-    def valider_reservation():
-        global selected_date, selected_time
-        selected_date = cal.get_date()  # Récupérer la date sélectionnée
-        selected_time = selected_time_var.get()  # Récupérer l'heure sélectionnée
-        reservation = Reservation(table,selected_time,selected_date)
-        table.addReservation(reservation)
-        interface._reservations_list.append(reservation)
-        if selected_time:
-            afficher_confirmation(table, selected_date, selected_time)
-        else:
-            Label(scrollable_frame, text="Veuillez sélectionner une heure !", font=(POlICE, 14), background="red").pack(pady=10)
-
-    Button(
-        scrollable_frame, text="Valider",
-        font=(POlICE, 14), background="lightgreen", command=valider_reservation
-    ).pack(pady=20)
-
-def generate_time_slots():
-    """Génère des créneaux horaires valides (10h-13h30 et 18h-21h30)."""
-    slots = []
-    morning_start = datetime.strptime("10:00", "%H:%M")
-    morning_end = datetime.strptime("13:30", "%H:%M")
-    evening_start = datetime.strptime("18:00", "%H:%M")
-    evening_end = datetime.strptime("21:30", "%H:%M")
-    
-    while morning_start <= morning_end:
-        slots.append(morning_start.strftime("%H:%M"))
-        morning_start += timedelta(minutes=30)
-
-    while evening_start <= evening_end:
-        slots.append(evening_start.strftime("%H:%M"))
-        evening_start += timedelta(minutes=30)
-    
-    return slots
-
-def afficher_confirmation(table, date, heure):
-    """Affiche un message de confirmation et revient à l'écran des tables."""
-    configurer_scrollable_frame()
-
-    Label(
-        scrollable_frame,
-        text=f"Réservation confirmée pour la Table {table.getId()}",
-        font=(POlICE, 20, "bold"),
-        background=LIGHT_CREAM_COLOR
-    ).pack(pady=20)
-
-    Label(
-        scrollable_frame,
-        text=f"Date : {date}\nHeure : {heure}",
-        font=(POlICE, 16),
-        background=LIGHT_CREAM_COLOR
-    ).pack(pady=10)
-
-    Button(
-        scrollable_frame, text="Retour aux tables",
-        font=(POlICE, 14), background="lightblue",
-        command=lambda: afficher_tables(interface._all_table)
-    ).pack(pady=20)
-
-
-def configurer_scrollable_frame():
-    """Configure le canvas et le frame scrollable de la frame de droite."""
-    global canvas, scrollbar, scrollable_frame
-    for widget in frame_droite.winfo_children():
-        widget.destroy()
-
-    canvas = Canvas(frame_droite, background=LIGHT_CREAM_COLOR)
-    scrollbar = Scrollbar(frame_droite, orient="vertical", command=canvas.yview)
-    scrollable_frame = Frame(canvas, background=LIGHT_CREAM_COLOR)
-
-    scrollable_frame.bind(
-        "<Configure>",
-        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-    )
-    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-
-
-def afficher_details_table(cadre, table):
-    """Affiche les informations d'une table dans le cadre donné."""
-    Label(cadre, text=f"Table ID : {table.getId()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
-    Label(cadre, text=f"Places : {table.getSeat_nbr()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
-    Label(cadre, text=f"État : {table.getState()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+            afficher_details_reservation(cadre_reservation, reservation)
+            
+            if x == 3:  # 4 colonnes par ligne
+                y += 1
+            x = (x + 1) % 4
 
 def afficher_details_reservation(cadre, reservation):
     """Affiche les informations d'une table dans le cadre donné."""
@@ -166,18 +68,7 @@ def afficher_details_reservation(cadre, reservation):
     Label(cadre, text=f"Date : {reservation.getDate()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
     Label(cadre, text=f"Hour : {reservation.getHour()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
 
-def afficher_boutons_options(cadre, table : Table):
-    """Affiche les boutons Réserver et Voir Réservations dans le cadre donné."""
-    Button(
-        cadre, text="Réserver", font=(POlICE, 14), background="lightgreen",
-        command=lambda: reserver_table(table)
-    ).pack(pady=5, padx=10, anchor="w")
-
-    Button(
-        cadre, text="Voir Réservations", font=(POlICE, 14), background="lightblue",
-        command=lambda: afficher_reservations(table.getReservations())
-    ).pack(pady=5, padx=10, anchor="w")
-
+#----------------------------------------------------------------TABLES-----------------------------------------------------------------------------#
 
 def afficher_tables(liste_table):
     """Affiche la liste des tables avec une grille et une scrollbar."""
@@ -199,25 +90,23 @@ def afficher_tables(liste_table):
                 y += 1
             x = (x + 1) % 4
 
+def afficher_details_table(cadre, table):
+    """Affiche les informations d'une table dans le cadre donné."""
+    Label(cadre, text=f"Table ID : {table.getId()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    Label(cadre, text=f"Places : {table.getSeat_nbr()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
+    Label(cadre, text=f"État : {table.getState()}", font=(POlICE, 16), background="white").pack(anchor="w", padx=10)
 
-def afficher_reservations(liste_reservation):
-    """Affiche la liste des réservations avec une grille et une scrollbar."""
-    configurer_scrollable_frame()
-    x, y = 0, 0
+def afficher_boutons_options(cadre, table : Table):
+    """Affiche les boutons Réserver et Voir Réservations dans le cadre donné."""
+    Button(
+        cadre, text="Réserver", font=(POlICE, 14), background="lightgreen",
+        command=lambda: reserver_table(table)
+    ).pack(pady=5, padx=10, anchor="w")
 
-    if liste_reservation == []:
-        displayEmpty(scrollable_frame, EMPTY_RESERVATION )
-    else:
-        for reservation in liste_reservation:
-            cadre_reservation = Frame(scrollable_frame, background="white", pady=10, padx=10, relief="raised", borderwidth=2)
-            cadre_reservation.grid(pady=10, padx=10, column=x, row=y)
-
-            afficher_details_reservation(cadre_reservation, reservation)
-            
-            if x == 3:  # 4 colonnes par ligne
-                y += 1
-            x = (x + 1) % 4
-
+    Button(
+        cadre, text="Voir Réservations", font=(POlICE, 14), background="lightblue",
+        command=lambda: afficher_reservations(table.getReservations())
+    ).pack(pady=5, padx=10, anchor="w")
 
 def basculer_options_table(cadre_table, table):
     """Affiche ou masque les options d'une table dans son cadre."""
@@ -233,15 +122,175 @@ def basculer_options_table(cadre_table, table):
         afficher_details_table(cadre_table, table)
         afficher_boutons_options(cadre_table, table)
 
+#----------------------------------------------------------------RESERVER TABLE-----------------------------------------------------------------------------#
+def reserver_table(table):
+    """Affiche un écran pour sélectionner la date, l'heure et le nom de réservation."""
+    configurer_scrollable_frame()
+
+    # Ajout du champ pour le nom
+    nom_var = ajouter_champ_nom(scrollable_frame)
+
+    # Conteneur principal pour le calendrier et les créneaux horaires
+    frame_principal = Frame(scrollable_frame, background=LIGHT_CREAM_COLOR)
+    frame_principal.pack(pady=20, padx=20, fill="both", expand=True)
+
+    # Section calendrier
+    cal = ajouter_calendrier(frame_principal)
+
+    # Section créneaux horaires
+    selected_time_var = ajouter_choix_horaires(frame_principal)
+
+    # Bouton de validation
+    Button(
+        scrollable_frame, text="Valider", font=(POlICE, 14),
+        background="lightgreen", command=lambda: valider_reservation(table, cal, selected_time_var, nom_var)
+    ).pack(pady=20)
+
+
+def ajouter_champ_nom(parent):
+    """Ajoute un champ pour le nom de réservation."""
+    frame_nom = Frame(parent, background=LIGHT_CREAM_COLOR)
+    frame_nom.pack(fill="x", pady=10)
+    Label(frame_nom, text="Nom de la réservation :", font=(POlICE, 16), background=LIGHT_CREAM_COLOR).pack(side="left", padx=10)
+
+    nom_var = StringVar()
+    Entry(frame_nom, textvariable=nom_var, font=(POlICE, 16), width=20).pack(side="left", padx=10)
+    return nom_var
+
+
+def ajouter_calendrier(parent):
+    """Ajoute un calendrier pour choisir une date."""
+    frame_cal = Frame(parent, background=LIGHT_CREAM_COLOR)
+    frame_cal.pack(side="left", fill="y", padx=40)
+
+    Label(frame_cal, text="Choisissez une date :", font=(POlICE, 16), background=LIGHT_CREAM_COLOR).pack(pady=10)
+    cal = Calendar(frame_cal, selectmode="day", mindate=datetime.now(), maxdate=datetime.now() + timedelta(days=60))
+    cal.pack()
+    return cal
+
+
+def ajouter_choix_horaires(parent):
+    """Ajoute les créneaux horaires matin et soir avec des boutons radio en grille."""
+    frame_heures = Frame(parent, background=LIGHT_CREAM_COLOR)
+    frame_heures.pack(side="right", fill="both", padx=20)
+
+    Label(frame_heures, text="Choisissez une heure :", font=(POlICE, 16), background=LIGHT_CREAM_COLOR).pack(pady=10)
+
+    time_slots = generate_time_slots()
+    selected_time_var = StringVar(value="")
+
+    for label, slots in time_slots.items():
+        Label(frame_heures, text=label, font=(POlICE, 14, "bold"), background=LIGHT_CREAM_COLOR).pack(pady=5)
+
+        slot_frame = Frame(frame_heures, background=LIGHT_CREAM_COLOR)
+        slot_frame.pack(pady=5, fill="x")
+
+        # Afficher les créneaux horaires dans une grille
+        max_columns = 4  # Nombre maximal de colonnes par ligne
+        for index, slot in enumerate(slots):
+            row, col = divmod(index, max_columns)
+            ttk.Radiobutton(
+                slot_frame,
+                text=slot,
+                variable=selected_time_var,
+                value=slot
+            ).grid(row=row, column=col, padx=5, pady=5, sticky="w")
+
+    return selected_time_var
+
+
+
+def generate_time_slots():
+    """Génère des créneaux horaires matin et soir."""
+    def slots(start, end):
+        while start <= end:
+            yield start.strftime("%H:%M")
+            start += timedelta(minutes=30)
+
+    return {
+        "Matin :": list(slots(datetime.strptime("10:00", "%H:%M"), datetime.strptime("13:30", "%H:%M"))),
+        "Soir :": list(slots(datetime.strptime("18:00", "%H:%M"), datetime.strptime("21:30", "%H:%M"))),
+    }
+
+
+def valider_reservation(table : Table, cal, selected_time_var, nom_var):
+    """Valide la réservation et affiche une confirmation."""
+    selected_date = cal.get_date()
+    selected_time = selected_time_var.get()
+    nom_reservation = nom_var.get().strip() or "defaultName"
+    r = Reservation(table,selected_time,selected_date, nom_reservation)
+    interface._reservations_list.append(r)
+    table.addReservation(r)
+    if selected_time:
+        afficher_confirmation(table, selected_date, selected_time, nom_reservation)
+    else:
+        Label(scrollable_frame, text="Veuillez sélectionner une heure !", font=(POlICE, 14), background="red").pack(pady=10)
+
+
+def afficher_confirmation(table, date, heure, nom):
+    """Affiche un message de confirmation et revient à l'écran des tables."""
+    configurer_scrollable_frame()
+
+    Label(
+        scrollable_frame,
+        text=f"Réservation confirmée pour la Table {table.getId()}",
+        font=(POlICE, 20, "bold"), background=LIGHT_CREAM_COLOR
+    ).pack(pady=20)
+
+    Label(
+        scrollable_frame,
+        text=f"Date : {date}\nHeure : {heure}\nNom : {nom}",
+        font=(POlICE, 16), background=LIGHT_CREAM_COLOR
+    ).pack(pady=10)
+
+    Button(
+        scrollable_frame, text="Retour aux tables", font=(POlICE, 14),
+        background="lightblue", command=lambda: afficher_tables(interface._all_table)
+    ).pack(pady=20)
+
+#--------------------------------------------------------------------AFFICHAGE FRAME DROIT---------------------------------------------------------------------------#
+
+def configurer_scrollable_frame():
+    """Configure le canvas et le frame scrollable de la frame de droite."""
+    global canvas, scrollbar, scrollable_frame
+    for widget in frame_droite.winfo_children():
+        widget.destroy()
+
+    canvas = Canvas(frame_droite, background=LIGHT_CREAM_COLOR)
+    scrollbar = Scrollbar(frame_droite, orient="vertical", command=canvas.yview)
+    scrollable_frame = Frame(canvas, background=LIGHT_CREAM_COLOR)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
 def displayEmpty(parent_frame, message):
     """Affiche un message indiquant qu'il n'y a pas de données à afficher."""
-    Label(
-        parent_frame,
-        text=message,
-        font=(POlICE, 20),
-        background=LIGHT_CREAM_COLOR,
-        justify="center"
+    Label(parent_frame,text=message,font=(POlICE, 20),background=LIGHT_CREAM_COLOR,justify="center"
     ).pack(pady=20, padx=20, anchor="center")
+
+#----------------------------------------------------------------NOTIFICATIONS-----------------------------------------------------------------------------#
+def verifier_et_notifier():
+    """Vérifie les tables et affiche des notifications si nécessaire."""
+    interface.check_table_status()
+    fenetre.after(60000, verifier_et_notifier)
+def afficher_notifications_recues():
+    """Affiche les notifications reçues dans la dernière heure."""
+    interface.clean_old_notifications()  # Nettoie les anciennes notifications
+    configurer_scrollable_frame()
+    if not interface.notifications:
+        displayEmpty(scrollable_frame, "Aucune notification récente.")
+    else:
+        for timestamp, message in interface.notifications:
+            Label(scrollable_frame,text=f"{timestamp.strftime('%H:%M:%S')} - {message}",font=(POlICE, 14),background="white",justify="left").pack(anchor="w", pady=5, padx=10)
+
+#----------------------------------------------------------------AFFICHAGE-----------------------------------------------------------------------------#
 
 # Titre de la partie gauche
 label_titre = Label(fenetre, text="La Bonne Fourchette", font=(POlICE, 34, "bold"), background=DARK_CREAM_COLOR, anchor="w")
@@ -262,7 +311,7 @@ ligne_separation = Frame(fenetre, width=5, background="white")
 ligne_separation.pack(side="left", fill="y")
 
 # Créer la zone d'affichage sur la droite (60% de la largeur)
-frame_droite = Frame(fenetre, width=0.55*1920, background=LIGHT_CREAM_COLOR)
+frame_droite = Frame(fenetre, width=0.50*1920, background=LIGHT_CREAM_COLOR)
 frame_droite.pack(side="left", fill="both", padx=50, expand=True)
 frame_droite.pack_propagate(False)  # Fixer la taille
 
@@ -285,7 +334,7 @@ scrollbar.pack(side="right", fill="y")
 zone_affichage = Label(frame_droite, text="", font=("Garamond", 20), background="#FFF5EE", justify="center")
 zone_affichage.pack(pady=20, padx=20, anchor="center")
 
-
+#----------------------------------------------------------------BOUTONS-----------------------------------------------------------------------------#
 # bouton pour afficher les tables
 bouton = Button(
     frame_boutons, text="Afficher les Tables", font=(POlICE, 18),  height=BTN_SIZE_Y, width=BTN_SIZE_X, background=RED_COLOR,
@@ -300,7 +349,12 @@ bouton = Button(
 )
 bouton.grid(pady=20, padx=10, row=0, column=1)
 
+button = Button(
+    frame_boutons,text="Afficher Notifications", font=(POlICE, 18), height=BTN_SIZE_Y, width=BTN_SIZE_X, background="lightcoral", command=afficher_notifications_recues
+)
+button.grid(pady=20, padx=10, row=1, column=0)
 
+#----------------------------------------------------------------LANCEMENT DU PROGRAMME-----------------------------------------------------------------------------#
 # Lancer la boucle principale de la fenêtre
 fenetre.mainloop()
 
