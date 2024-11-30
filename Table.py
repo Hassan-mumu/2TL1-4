@@ -1,114 +1,92 @@
-import time
-from datetime import *
+from datetime import datetime, timedelta
 
 
 class Table:
-
     id = 1
-    def __init__(self, seat_nbr : int, state="V"):# command_nbr=0):
-        
-        self._tableId = Table.id
-        self._seat_nbr = seat_nbr
-        self._state = state
-        self._reservations = []
-        self._start_time = None
+
+    def __init__(self, seat_nbr: int, tId=None, state="V"):
+        self.__table_id = tId if tId else Table.id
+        self.__seat_nbr = seat_nbr
+        self.__state = state
+        self.__reservations = []
+        self.__start_time = None
         Table.id += 1
 
+    # Propriétés pour table_id
+    @property
+    def table_id(self):
+        return self.__table_id
 
-    def getId(self):
-        return self._tableId
+    @table_id.setter
+    def table_id(self, value):
+        self.__table_id = value
 
-    def setId(self, tableId):
-        self._tableId = tableId
+    # Propriétés pour seat_nbr
+    @property
+    def seat_nbr(self):
+        return self.__seat_nbr
 
-    def getSeat_nbr(self):
-        return self._seat_nbr
+    @seat_nbr.setter
+    def seat_nbr(self, value):
+        self.__seat_nbr = value
 
-    def setSeat_nbr(self, seat_nbr):
-        self._seat_nbr = seat_nbr
+    # Propriétés pour state
+    @property
+    def state(self):
+        return self.__state
 
-    #def getCommand_nbr(self):
-        #return self._command_nbr
-
-    #def setCommand_nbr(self, command_nbr):
-        #self._command_nbr = command_nbr
-
-    def getState(self):
-            return self._state
-
-    def changeState(self, new_state):
-        """#Rajae
-        Pré: param new_state: doit être une valeur valide parmi ['X', 'V', 'R']
-
-        Post:
-            return: le nouvel état de la table si la valeur est valide.
-            return: None si la valeur new_state est invalide.
-        """
-
+    @state.setter
+    def state(self, new_state):
+        """Change l'état de la table et met à jour le temps si nécessaire."""
         if new_state not in ['X', 'V', 'R']:
-            return None # 'X' = occupée, 'V' = disponible, 'R' = réservé
-        self._state = new_state
+            raise ValueError("État invalide : doit être 'X', 'V' ou 'R'")
+        self.__state = new_state
         if new_state == 'X':
-            self.startTime()
+            self.start_time = datetime.now()
         elif new_state == 'V':
-            self.resetTime()
-        #elif new_state == 'R':
-            #self.startTime()
-        return new_state
-    
-    def getReservations(self):
-        return self._reservations
-    
-    def addReservation(self, reservation):
-        if reservation not in self.getReservations():
-            self._reservations.append(reservation)
+            self.reset_time()
 
-    def removeReservation(self, reservation):
-        """
-          #Loyde 
-          PRE : - reservation est un objet de Reservation. 
-                - self._reservations doit contenir l'objet reservation. 
-          
-          POST : - La réservation est retirée de la liste self._reservations si elle s'y trouve. 
-        """
-        if reservation in self._reservations:
-            self._reservations.remove(reservation)
+    # Propriétés pour reservations
+    @property
+    def reservations(self):
+        return self.__reservations
 
-    def startTime(self):
-        self._start_time = datetime.now()
-        
-    def endTime(self):
-        """#Rajae
-        Pré:
-        -l'attribut self._star_time doit être un objet datetime qui représente le début d'occupation.
+    def add_reservation(self, reservation):
+        if reservation not in self.reservations:
+            self.__reservations.append(reservation)
 
-        Post:
-        - return :  - un objet datetime si la table est occupée = self._star_time + 90
-                    - None si la table n'est pas occupée .
+    def remove_reservation(self, reservation):
+        """Retire une réservation si elle est présente."""
+        if reservation in self.reservations:
+            self.__reservations.remove(reservation)
 
+    # Propriétés pour start_time
+    @property
+    def start_time(self):
+        return self.__start_time
 
-        """
-        if self._start_time is not None:
-            return self._start_time + timedelta(minutes=90)
+    @start_time.setter
+    def start_time(self, value):
+        self.__start_time = value
+
+    def end_time(self):
+        """Retourne l'heure de fin d'occupation (90 minutes après start_time)."""
+        if self.start_time is not None:
+            return self.start_time + timedelta(minutes=90)
         return None
 
-        #if self._start_time is not None:
-           # timer_tb = time.perf_counter() - self._start_time
-           # self.resetTime()
-            #return timer_tb
-        #return 0
+    def reset_time(self):
+        """Réinitialise le temps de début."""
+        self.__start_time = None
 
-
-    def resetTime(self):
-        self._start_time = None
-
-
+    # Méthodes spéciales
     def __str__(self):
-        return f"table {self.getId()}"
-    
+        return f"Table {self.table_id} (Seats: {self.seat_nbr}, State: {self.state})"
+
     def __repr__(self):
-        return f"table {self.getId()}"
-    
-    def __eq__(self, table):
-        if isinstance(table, Table):
-            return self.getId() == table.getId()
+        return str(self)
+
+    def __eq__(self, other):
+        if isinstance(other, Table):
+            return self.table_id == other.table_id
+        return False
