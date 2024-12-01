@@ -97,7 +97,7 @@ class Restaurant:
         if isinstance(table, Table):
             table = [table]
         for tab in table:
-            if tab.getState() == 'V':
+            if tab.state == 'V':
                 self.__available_table.append(tab)
                 self.__all_table.append(tab)
 
@@ -115,11 +115,15 @@ class Restaurant:
 
         cpy_list = [table for table in table_list]
         if self.__reservations_list:
-            cpy_list = [
-                [table for reservation in table.reservations if self.isReservable(
-                    reservation, (heure, date))]
-                for table in table_list
-            ]
+            cpy_list = []
+            for table in table_list:
+                i = 0
+                reservable = True
+                while i < len(table.reservations) and reservable:
+                    reservable = self.isReservable(table.reservations[i], (heure, date))  
+                    i += 1
+                if reservable:
+                    cpy_list.append(table)
         return cpy_list
 
     def isReservable(self, res: Reservation, suggested_res):
@@ -134,7 +138,7 @@ class Restaurant:
         res_date = res.date
         sug_hour = suggested_res[0]
         sug_date = suggested_res[1]
-        return res_date == sug_date and abs((res_hour.hour * 60 + res_hour.minute) - (sug_hour.hour * 60 + sug_hour.minute)) >= 90
+        return res_date != sug_date or (res_date == sug_date and abs((res_hour.hour * 60 + res_hour.minute) - (sug_hour.hour * 60 + sug_hour.minute)) >= 90)
 
     def filterBySeats(self, seats: int, table_list=None):
         """
@@ -218,8 +222,7 @@ class Restaurant:
                 "Entrée une date valide sous le format dd/mm/yyyy (ex:24/10/2023) : ")
             valid = re.match(formatDate, proposedDate)
             if valid:
-                proposedDate = datetime.strptime(
-                    proposedDate, "%d/%m/%Y").date()
+                proposedDate = datetime.strptime(proposedDate, "%d/%m/%Y").date()
                 # valid = proposedDate < max_date
                 if today <= proposedDate <= max_date:
                     valid = True
@@ -318,17 +321,17 @@ class Restaurant:
         for table in self.__all_table:
             for reservation in table.reservations:
                 reservation_time = datetime.combine(
-                    current_time.date(), reservation.getHour())
+                    current_time.date(), reservation.hour)
                 if reservation_time <= current_time <= reservation_time + timedelta(minutes=15):
-                    if table.getState() != 'X':
+                    if table.state != 'X':
                         self.notify(
-                            f"Rappel : La table {table.getId()} réservée à {reservation.getHour().strftime('%H:%M')} n'est toujours pas marquée occupée.")
+                            f"Rappel : La table {table.t_id()} réservée à {reservation.hour().strftime('%H:%M')} n'est toujours pas marquée occupée.")
 
-                if table.getState() == 'X' and table.endTime():
-                    end_time = table.endTime()
+                if table.state == 'X' and table.end_time():
+                    end_time = table.end_time()
                     if end_time and (end_time - current_time <= timedelta(minutes=15)):
                         self.notify(
-                            f"Notification : La table {table.getId()} sera disponible dans 15 minutes.")
+                            f"Notification : La table {table.t_id} sera disponible dans 15 minutes.")
 
     def askpswd(self, attempt):
         return attempt == self.__password
@@ -405,28 +408,12 @@ class Restaurant:
                            current_time and not any(res[0] <= slot < res[1] for res in reserved_slots)]
 
         print(
-            f"Créneaux disponibles pour la table {table.getId()} aujourd'hui ({today.strftime('%d/%m/%Y')}):")
+            f"Créneaux disponibles pour la table {table.t_id()} aujourd'hui ({today.strftime('%d/%m/%Y')}):")
         if available_slots:
             for slot in available_slots:
                 print(slot.strftime("%H:%M"))
         else:
             print("Aucun créneau disponible pour aujourd'hui.")
-
-    def reserveTable(self):
-        """#Hassan
-        PRE:
-        - self.available_table doit etre une liste de table non vide
-        POST:
-        - Crée une reservation, Ajoute la reservation à la table et à la liste des réservations de l'interface         
-        """
-        print(self.__available_table)
-        tId = int(input("Choose a Table number : "))
-        tab = [table for table in self.__available_table if table.getId()
-               == tId][0]
-        print(tab)
-        r = Reservation(tab)
-        tab.addReservation(r)
-        self.__reservations_list.append(r)
 
 
 """

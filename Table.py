@@ -5,7 +5,7 @@ class Table:
     id = 1
 
     def __init__(self, seat_nbr: int, tId=None, state="V"):
-        self.__table_id = tId if tId else Table.id
+        self.__t_id = tId if tId else Table.id
         self.__seat_nbr = seat_nbr
         self.__state = state
         self.__reservations = []
@@ -14,12 +14,12 @@ class Table:
 
     # Propriétés pour table_id
     @property
-    def table_id(self):
-        return self.__table_id
+    def t_id(self):
+        return self.__t_id
 
-    @table_id.setter
-    def table_id(self, value):
-        self.__table_id = value
+    @t_id.setter
+    def t_id(self, value):
+        self.__t_id = value
 
     # Propriétés pour seat_nbr
     @property
@@ -81,12 +81,12 @@ class Table:
 
     # Méthodes spéciales
     def __str__(self):
-        return f"Table {self.table_id} (Seats: {self.seat_nbr}, State: {self.state})"
+        return f"Table {self.t_id}"
 
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other):
         if isinstance(other, Table):
-            return self.table_id == other.table_id
+            return self.t_id == other.table_id
         return False
