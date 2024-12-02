@@ -1,5 +1,5 @@
 from tkinter import messagebox
-from Reservation import Reservation
+from reservation import Reservation
 from Table import Table
 from datetime import *
 import re
@@ -326,18 +326,30 @@ class Restaurant:
 
         for table in self.__all_table:
             for reservation in table.reservations:
-                reservation_time = datetime.combine(
-                    current_time.date(), reservation.hour)
+                reservation_time = datetime.combine(reservation.res_date, reservation.res_hour)
+
+                # Vérifier si la table est en retard
+                if reservation_time < current_time and table.state != 'X':
+                    self.notify(
+                        f"Retard détecté : La table {table.t_id} réservée à {reservation.res_hour.strftime('%H:%M')} "
+                        f"par {reservation.name} est en retard. Veuillez vérifier."
+                    )
+
+                # Rappel si la table approche de l'heure de réservation
                 if reservation_time <= current_time <= reservation_time + timedelta(minutes=15):
                     if table.state != 'X':
                         self.notify(
-                            f"Rappel : La table {table.t_id()} réservée à {reservation.hour().strftime('%H:%M')} n'est toujours pas marquée occupée.")
+                            f"Rappel : La table {table.t_id} réservée à {reservation.res_hour.strftime('%H:%M')} "
+                            f"n'est toujours pas marquée occupée."
+                        )
 
+                # Notification pour les tables qui se libèrent bientôt
                 if table.state == 'X' and table.end_time():
                     end_time = table.end_time()
                     if end_time and (end_time - current_time <= timedelta(minutes=15)):
                         self.notify(
-                            f"Notification : La table {table.t_id} sera disponible dans 15 minutes.")
+                            f"Notification : La table {table.t_id} sera disponible dans 15 minutes."
+                        )
 
     def askpswd(self, attempt):
         return attempt == self.__password

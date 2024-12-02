@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from Reservation import Reservation
+from reservation import Reservation
 from Table import Table
 
 class DatabaseManager:
