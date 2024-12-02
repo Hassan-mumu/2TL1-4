@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 class Table:
     id = 1
 
-    def __init__(self, seat_nbr: int, tId=None, state="V"):
+    def __init__(self, seat_nbr: int, tId=None, state="V", start_time=None):
         self.__t_id = tId if tId else Table.id
         self.__seat_nbr = seat_nbr
         self.__state = state
         self.__reservations = []
-        self.__start_time = None
+        self.__start_time = start_time
         Table.id += 1
 
     # Propriétés pour table_id

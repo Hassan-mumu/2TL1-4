@@ -6,11 +6,12 @@ import re
 
 
 class Restaurant:
-    def __init__(self, *tables):
-        self.__all_table = list(tables) if tables else []
-        self.__available_table = []
-        self.__occupied_table = []
-        self.__reservations_list = []
+    def __init__(self, db_manager, *tables):
+        self.db_manager = db_manager  # Instance de DatabaseManager
+        self.__all_table = self.db_manager.load_tables()
+        self.__available_table = [t for t in self.__all_table if t.state == 'V']
+        self.__occupied_table = [t for t in self.__all_table if t.state == 'X']
+        self.__reservations_list = self.db_manager.load_reservations(self.__all_table)
         self.__password = 0000
         self.__baby_chairs_total = 8
         self.__baby_chairs_available = 8
@@ -86,6 +87,11 @@ class Restaurant:
         self.__notifications = notifications
 
 
+    # Sauvegarder les données
+    def save_data(self):
+        self.db_manager.save_tables(self.__all_table)
+        self.db_manager.save_reservations(self.__reservations_list)
+
     # Méthodes liées aux tables
     def addTable(self, table):
         """
@@ -101,7 +107,7 @@ class Restaurant:
                 self.__available_table.append(tab)
                 self.__all_table.append(tab)
 
-    def filterByDateTime(self, date, heure, table_list):
+    def filterByDateTime(self, res_date, res_heure, table_list):
         """
         Filtre les tables disponibles à une date et heure données.
 
@@ -120,7 +126,7 @@ class Restaurant:
                 i = 0
                 reservable = True
                 while i < len(table.reservations) and reservable:
-                    reservable = self.isReservable(table.reservations[i], (heure, date))  
+                    reservable = self.isReservable(table.reservations[i], (res_heure, res_date))  
                     i += 1
                 if reservable:
                     cpy_list.append(table)
@@ -415,11 +421,3 @@ class Restaurant:
         else:
             print("Aucun créneau disponible pour aujourd'hui.")
 
-
-"""
-Note d'ajout: 
-- Dans makeReservation, faire en sorte d'ajouter la reservation à la table
-- Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
-- Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
-- Permettre la gestion de chaises pour bébé (on peut supposer 8 chaises dans tout le restaurant)
-"""

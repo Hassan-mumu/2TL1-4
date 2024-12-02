@@ -2,8 +2,9 @@
 # ----------------------------------------------------------------IMPORTS-----------------------------------------------------------------------------#
 
 # Assurer que l'interface est correctement initialisée avec des tables
-from Restaurant import *
+from DatabaseManager import DatabaseManager
 from tkinter import *
+from Restaurant import *
 from tkinter import ttk
 from tkcalendar import Calendar
 from datetime import datetime, timedelta
@@ -22,15 +23,23 @@ selected_tables = []  # Liste pour stocker les tables sélectionnées
 
 # ----------------------------------------------------------------CHARGEMENT DES DONNEES-----------------------------------------------------------------------------#
 
-interface = Restaurant()
+# Créer une instance de DatabaseManager
+db_manager = DatabaseManager()
 
-for i in range(1, 21):
-    if i <= 10:
-        interface.addTable(Table(2))
-    elif i <= 16:
-        interface.addTable(Table(4))
-    else:
-        interface.addTable(Table(6))
+# Charger ou initialiser l'interface
+interface = Restaurant(db_manager)
+
+# Ajouter des tables si aucune n'existe
+if not interface.all_table:
+    for i in range(1, 21):
+        if i <= 10:
+            interface.addTable(Table(2))
+        elif i <= 16:
+            interface.addTable(Table(4))
+        else:
+            interface.addTable(Table(6))
+
+# Exemple de sauvegarde à la fin du programme
 
 # Créer la fenêtre principale
 fenetre = Tk()
@@ -506,6 +515,8 @@ Button(
 # Lancer la boucle principale de la fenêtre
 verifier_et_notifier()
 fenetre.mainloop()
+interface.save_data()
+print("Données sauvegardées avec succès.")
 
 """
 Note d'ajout:
