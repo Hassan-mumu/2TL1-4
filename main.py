@@ -521,10 +521,7 @@ print("Données sauvegardées avec succès.")
 """
 Note d'ajout:
 - La selection des tables ne doit pas etre confirmer tant que le nombre de personnes pour une reservation n'est pas inferieur ou égal au nombre de places 
-- Faire en sorte de pouvoir ajouter plusieurs tables à une reservation (mergedTable)
 - Faire une fonction qui check les réservations, places les tables dans les listes correspondantes et change l'état des Tables si l'heure des réservation correspond 
-- enregistrer l'état des tables à la fin du programmes dans un fichier json ou dans une base de données
-- charger les tables depuis un fichier json qui contient l'etat des tables pré-existantes ou charger les tables depuis une base de donnée
 - restructurer le code (le rendre plus lisibles, séparer les constantes, les imports, les getter/setter et les méthodes dans différentes sections pour chaque fichier)
 - faire la gestion des erreurs avec exception
 - ajouter le linter
