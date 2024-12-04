@@ -89,6 +89,8 @@ class Restaurant:
 
     # Sauvegarder les données
     def save_data(self):
+        self.db_manager.clean_expired_reservations()  # Supprime les réservations expirées
+        #self.reload_table_states()  # Recharge les états des tables
         self.db_manager.save_tables(self.__all_table)
         self.db_manager.save_reservations(self.__reservations_list)
 
@@ -314,13 +316,21 @@ class Restaurant:
         one_hour_ago = datetime.now() - timedelta(hours=1)
         self.__notifications = [
             (time, msg) for time, msg in self.__notifications if time > one_hour_ago]
+        # Set pour stocker les clés des notifications envoyées
+        notifications_envoyees = set()
+
+        # Fonction d'envoi de notification
+    def envoyer_notification(cle, message):
+        if cle in notifications_envoyees:
+            print("Notification déjà envoyée.")
+            return
+        # Ajouter la clé pour éviter les doublons
+        notifications_envoyees.add(cle)
+        print(f"Notification envoyée : {message}")
 
     def check_table_status(self):
         """
-        Vérifie l'état des tables et génère des notifications.
-
-        PRE : self.__all_table est une liste contenant des objets Table.
-        POST : Envoie des notifications si une table doit être marquée comme occupée ou si une table se libère bientôt.
+        Vérifie l'état des tables et génère des notifications pour les retards et les suivis.
         """
         current_time = datetime.now()
 
@@ -328,27 +338,26 @@ class Restaurant:
             for reservation in table.reservations:
                 reservation_time = datetime.combine(reservation.res_date, reservation.res_hour)
 
-                # Vérifier si la table est en retard
-                if reservation_time < current_time and table.state != 'X':
-                    self.notify(
-                        f"Retard détecté : La table {table.t_id} réservée à {reservation.res_hour.strftime('%H:%M')} "
-                        f"par {reservation.name} est en retard. Veuillez vérifier."
-                    )
+                # Clés uniques pour chaque type de notification
+                cle_retard = f"retard_table_{table.t_id}_{reservation.res_hour.strftime('%H:%M')}"
+                cle_contact = f"contact_table_{table.t_id}_{reservation.res_hour.strftime('%H:%M')}"
 
-                # Rappel si la table approche de l'heure de réservation
-                if reservation_time <= current_time <= reservation_time + timedelta(minutes=15):
-                    if table.state != 'X':
+                # Notification de retard : 5 minutes après l'heure de réservation
+                if current_time > reservation_time + timedelta(minutes=5) and table.state != 'X':
+                    if cle_retard not in self.notifications_envoyees:
+                        self.notifications_envoyees.add(cle_retard)
                         self.notify(
-                            f"Rappel : La table {table.t_id} réservée à {reservation.res_hour.strftime('%H:%M')} "
-                            f"n'est toujours pas marquée occupée."
+                            f"Retard détecté : La table {table.t_id} réservée à {reservation.res_hour.strftime('%H:%M')} "
+                            f"par {reservation.name} est en retard depuis 5 minutes. Veuillez vérifier."
                         )
 
-                # Notification pour les tables qui se libèrent bientôt
-                if table.state == 'X' and table.end_time():
-                    end_time = table.end_time()
-                    if end_time and (end_time - current_time <= timedelta(minutes=15)):
+                # Notification de contact : 10 minutes après l'heure de réservation
+                if current_time > reservation_time + timedelta(minutes=15) and table.state != 'X':
+                    if cle_contact not in self.notifications_envoyees:
+                        self.notifications_envoyees.add(cle_contact)
                         self.notify(
-                            f"Notification : La table {table.t_id} sera disponible dans 15 minutes."
+                            f"Contact client : La table {table.t_id} réservée à {reservation.res_hour.strftime('%H:%M')} "
+                            f"par {reservation.name} n'est toujours pas occupée. Veuillez contacter le client."
                         )
 
     def askpswd(self, attempt):
@@ -411,7 +420,6 @@ class Restaurant:
         close_morning = time(14, 30)
         open_evening = time(18, 0)
         close_evening = time(22, 30)
-
         morning_slots = self.generateTimeSlots(
             open_morning, close_morning, timedelta(minutes=90))
         evening_slots = self.generateTimeSlots(

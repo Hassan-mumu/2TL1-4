@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from reservation import Reservation
 from Table import Table
 
@@ -108,3 +108,50 @@ class DatabaseManager:
 
         conn.close()
         return reservations
+
+    def clean_expired_reservations(self):
+        """Supprime les réservations expirées et met à jour l'état des tables associées."""
+        now = datetime.now()
+        today = now.date()
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        # Rechercher les réservations expirées
+        expired_reservations_query = """
+            SELECT id, table_ids
+            FROM reservations
+            WHERE res_date = ? AND time(res_hour) <= time(?)
+        """
+        cursor.execute(expired_reservations_query, (today, (now - timedelta(minutes=30)).time().strftime('%H:%M:%S')))
+        expired_reservations = cursor.fetchall()
+
+        for reservation_id, table_ids in expired_reservations:
+            if table_ids:  # Vérifie que des tables sont associées
+                table_id_list = table_ids.split(",")  # Transforme les IDs des tables en liste
+                for table_id in table_id_list:
+                    # Vérifie si la table est associée à une autre réservation
+                    cursor.execute("""
+                        SELECT COUNT(*)
+                        FROM reservations
+                        WHERE instr(table_ids, ?) > 0
+                    """, (table_id,))
+                    other_reservations = cursor.fetchone()[0]
+
+                    # Vérifie que la table n'est pas occupée (state != 'X')
+                    cursor.execute("SELECT state FROM tables WHERE id = ?", (table_id,))
+                    current_state = cursor.fetchone()[0]
+
+                    # Si aucune autre réservation n'est associée ET la table est en état 'R'
+                    if other_reservations == 0 and current_state == 'R':
+                        cursor.execute("UPDATE tables SET state = 'V' WHERE id = ?", (table_id,))
+                        print(f"Table {table_id} mise à jour à l'état 'V' (plus aucune réservation et non occupée).")
+
+            # Supprimer la réservation expirée
+            cursor.execute("DELETE FROM reservations WHERE id = ?", (reservation_id,))
+            print(f"Réservation {reservation_id} supprimée (expirée).")
+
+        conn.commit()
+        conn.close()
+        print("Les réservations expirées ont été supprimées et les tables associées mises à jour.")
+
+#supprimer la réservation.

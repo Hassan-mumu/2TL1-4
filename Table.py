@@ -33,6 +33,16 @@ class Table:
     # Propriétés pour state
     @property
     def state(self):
+        now = datetime.now()
+
+        # Si la table est en état 'R' (Réservée), vérifier si le temps est dépassé
+        if self.__state == 'R':
+            for reservation in self.__reservations:
+                res_time = datetime.combine(reservation.res_date, reservation.res_hour)
+                if now > res_time + timedelta(minutes=30):  # Réservation expirée
+                    print(f"La réservation pour la table {self.__t_id} a expiré.")
+                    self.remove_reservation(reservation)
+                    self.__state = 'V'  # Table redevient disponible
         return self.__state
 
     @state.setter
@@ -90,3 +100,4 @@ class Table:
         if isinstance(other, Table):
             return self.t_id == other.table_id
         return False
+

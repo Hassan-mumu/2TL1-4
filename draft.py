@@ -7,7 +7,7 @@ from Restaurant import *
 from tkinter import ttk, NORMAL, DISABLED
 from tkcalendar import Calendar
 from datetime import datetime, timedelta
-from PIL import Image, ImageTk
+
 # ----------------------------------------------------------------NOTIFICATION-----------------------------------------------------------------------------#
 
 RED_COLOR = "indianred"
@@ -95,7 +95,7 @@ def afficher_details_reservation(cadre, reservation: Reservation):
 
     # Ajouter un bouton "Occupée" avec l'état dynamique
     occupe_button = Button(
-        cadre, text="Occupée", font=('monotype CORSIVA', 14), background="#f0cb7b",activebackground="#2f2b2d",
+        cadre, text="Occupée", font=(POlICE, 14), background="lightcoral",
         state=button_state,  # État dynamique
         command=lambda res=reservation: set_table_occupee(res)  # Capture explicite de "reservation"
     )
@@ -114,7 +114,7 @@ def afficher_details_reservation(cadre, reservation: Reservation):
 
     # Ajouter un bouton "Annuler la réservation"
     Button(
-        cadre, text="Annuler la réservation",  font=('monotype CORSIVA', 14), background="#f0cb7b",activebackground="#2f2b2d",
+        cadre, text="Annuler la réservation", font=(POlICE, 14), background="indianred",
         command=lambda: annuler_reservation(reservation)
     ).pack(pady=5, padx=10, anchor="w")
 
@@ -519,30 +519,22 @@ def afficher_confirmation(reservation: Reservation):
 def afficher_reservations_type():
     configurer_scrollable_frame()
 
-    # Titre
     Label(
-        scrollable_frame, text="Choisissez un type de réservation : ",
-        font=('monotype CORSIVA', 26),
-        background=LIGHT_CREAM_COLOR
-    ).pack(pady=75, padx=100, anchor="center")  # Centré horizontalement
+        scrollable_frame, text="Choisissez un type de réservation : ", font=(POlICE, 26), background=LIGHT_CREAM_COLOR
+    ).pack(pady=75, padx=100)
 
-    # Conteneur pour centrer les boutons
     button_frame = Frame(scrollable_frame, background=LIGHT_CREAM_COLOR)
-    button_frame.pack(pady=20, expand=True)  # `expand=True` pour occuper tout l'espace disponible
-
-    # Ajouter les boutons et les centrer
-    Button(
-        button_frame, text="Sur Place", width=BTN_SIZE_X, height=BTN_SIZE_Y,
-        fg="#f0cb7b", font=('monotype CORSIVA', 25),
-        background="#2f2b2d", command=filter_liste
-    ).pack(side="left", padx=20)  # Ajouter un espacement horizontal
+    button_frame.pack(pady=20)
 
     Button(
-        button_frame, text="Sur Reservation", width=BTN_SIZE_X, height=BTN_SIZE_Y,
-        fg="#f0cb7b", font=('monotype CORSIVA', 25),
-        background="#2f2b2d", command=choisir_date_heure
-    ).pack(side="left", padx=20)  # Ajouter un espacement horizontal
+        button_frame, text="Sur Place", width=BTN_SIZE_X, height=BTN_SIZE_Y, font=(POlICE, 22),
+        background="lightblue", command=filter_liste
+    ).pack(padx=10, side="left")
 
+    Button(
+        button_frame, text="Sur Reservation", width=BTN_SIZE_X, height=BTN_SIZE_Y, font=(POlICE, 22),
+        background="lightblue", command=choisir_date_heure
+    ).pack(side="right")
 
 
 def choisir_date_heure():
@@ -733,64 +725,35 @@ def nettoyer_reservations_periodiques():
 
 
 # ----------------------------------------------------------------AFFICHAGE-----------------------------------------------------------------------------#
-# Charger le logo
-def charger_logo():
-    """Charge le logo et le redimensionne."""
-    try:
-        image = Image.open("logo.png")  # Remplacez par le nom de votre fichier logo
-        image = image.resize((100, 100), Image.Resampling.LANCZOS)  # Redimensionnez à 100x100 pixels
-        return ImageTk.PhotoImage(image)
-    except Exception as e:
-        print(f"Erreur lors du chargement du logo : {e}")
-        return None
 
-# Modifier l'arrière-plan de la fenêtre
-fenetre.configure(background="#2f2b2d")
-BACKGROUND_COLOR = '#2f2b2d'  # Marron foncé
-TITLE_COLOR = "#F5F5DC"  # Doré
 
-# Créer le header (titre + logo)
-header_frame = Frame(fenetre, bg="#2f2b2d")
-header_frame.pack(fill="x", pady=(10, 0), padx=(50, 0))
-
-# Charger et afficher le logo
-logo_image = charger_logo()
-if logo_image:
-    logo_label = Label(header_frame, image=logo_image, bg="#2f2b2d")
-    logo_label.pack(side="left", padx=10)
-
-# Ajouter le titre doré
-label_titre = Label(
-    header_frame,
-    text="La Bonne Fourchette",
-    font=('Edwardian Script ITC', 49),#'aLGERIAN', Brush Script MT 'Harrington'
-    bg="#2f2b2d",
-    fg="#f0cb7b",  # Couleur dorée
-    anchor="w"
-)
-label_titre.pack(side="left", padx=10)
+# Titre de la partie gauche
+label_titre = Label(fenetre, text="La Bonne Fourchette", font=(
+    POlICE, 34, "bold"), background=DARK_CREAM_COLOR, anchor="w")
+# Ancrer en haut à gauche
+label_titre.pack(pady=(10, 0), padx=(50, 0), anchor="nw")
 
 # Créer une frame pour la partie gauche (40% de la largeur)
-frame_gauche = Frame(fenetre, width=0.35 * 1920, background="#2f2b2d")
+frame_gauche = Frame(fenetre, width=0.35 * 1920, background=LIGHT_CREAM_COLOR)
 frame_gauche.pack(side="left", fill="y", padx=10)
-frame_gauche.pack_propagate(False)
+frame_gauche.pack_propagate(False)  # Fixer la taille
 
 # Créer la frame des boutons à l'intérieur de frame_gauche
-frame_boutons = Frame(frame_gauche, background="#2f2b2d")
+frame_boutons = Frame(frame_gauche, background=LIGHT_CREAM_COLOR)
 frame_boutons.pack(pady=20, padx=20, fill="y")
 
 # Ligne de séparation
-ligne_separation = Frame(fenetre, width=5, background="#f0cb7b")  # Couleur modifiée
+ligne_separation = Frame(fenetre, width=5, background="white")
 ligne_separation.pack(side="left", fill="y")
 
 # Créer la zone d'affichage sur la droite (60% de la largeur)
-frame_droite = Frame(fenetre, width=0.50 * 1920, background="#2f2b2d")
+frame_droite = Frame(fenetre, width=0.50 * 1920, background=LIGHT_CREAM_COLOR)
 frame_droite.pack(side="left", fill="both", padx=50, expand=True)
-frame_droite.pack_propagate(False)
+frame_droite.pack_propagate(False)  # Fixer la taille
 
-canvas = Canvas(frame_droite, background="#2f2b2d")
+canvas = Canvas(frame_droite, background=LIGHT_CREAM_COLOR)
 scrollbar = Scrollbar(frame_droite, orient="vertical", command=canvas.yview)
-scrollable_frame = Frame(canvas, background="#2f2b2d")
+scrollable_frame = Frame(canvas, background=LIGHT_CREAM_COLOR)
 
 scrollable_frame.bind(
     "<Configure>",
@@ -809,46 +772,39 @@ zone_affichage = Label(frame_droite, text="", font=(
 zone_affichage.pack(pady=20, padx=20, anchor="center")
 
 # ----------------------------------------------------------------BOUTONS-----------------------------------------------------------------------------#
-
 # bouton pour afficher les tables
-# Créer un conteneur pour le bouton
 Button(
-    frame_boutons, text="Tables", font=('monotype CORSIVA', 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
-    activebackground="#2f2b2d",background="#f0cb7b",
+    frame_boutons, text="Afficher les Tables", font=(POlICE, 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
+    background=RED_COLOR,
     command=lambda: afficher_tables(interface.all_table)
 ).grid(pady=20, padx=10, row=0, column=0)
 
-
 # bouton pour afficher les réservations
 Button(
-    frame_boutons, text="Reservations", font=('monotype CORSIVA', 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
-    activebackground="#2f2b2d",background="#f0cb7b",
+    frame_boutons, text="Afficher les Reservations", font=(POlICE, 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
+    background=RED_COLOR,
     command=lambda: afficher_reservations(interface.reservations_list)
 ).grid(pady=20, padx=10, row=0, column=1)
 
 Button(
-    frame_boutons, text="Notifications", font=('monotype CORSIVA', 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
-    activebackground="#2f2b2d",background="#f0cb7b", command=afficher_notifications_recues
+    frame_boutons, text="Afficher Notifications", font=(POlICE, 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
+    background="lightcoral", command=afficher_notifications_recues
 ).grid(pady=20, padx=10, row=1, column=0)
 
 Button(
-    frame_boutons, text="Créer Une Reservation", font=('monotype CORSIVA', 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
-     activebackground="#2f2b2d",background="#f0cb7b", command=afficher_reservations_type
+    frame_boutons, text="Créer Une Reservation", font=(POlICE, 18), height=BTN_SIZE_Y, width=BTN_SIZE_X,
+    background="lightcoral", command=afficher_reservations_type
 ).grid(pady=20, padx=10, row=1, column=1)
 
 # ----------------------------------------------------------------LANCEMENT DU PROGRAMME-----------------------------------------------------------------------------#
 # Lancer la boucle principale de la fenêtre
 verifier_et_notifier()
-
+fenetre.mainloop()
 interface.save_data()
 nettoyer_reservations_periodiques()
 # Nettoyer les réservations expirées au démarrage
 db_manager.clean_expired_reservations()
 
-#label_titre = Label(fenetre, text="La Bonne Fourchette", font=(
-    #POlICE, 34, "bold"), background=DARK_CREAM_COLOR, anchor="w")
-#label_titre.pack(pady=(10, 0), padx=(50, 0), anchor="nw")
-fenetre.mainloop()
 print("Données sauvegardées avec succès.")
 
 """
@@ -859,3 +815,66 @@ Note d'ajout:
 - faire la gestion des erreurs avec exception
 - ajouter le linter
 """
+
+#-----------------------------
+def charger_logo():
+    """Charge le logo du fichier et le redimensionne."""
+    try:
+        image = Image.open("logo.png")  # Remplacez par le nom correct de votre logo
+        image = image.resize((100, 100), Image.Resampling.LANCZOS)
+        return ImageTk.PhotoImage(image)
+    except Exception as e:
+        print(f"Erreur lors du chargement du logo : {e}")
+        return None
+
+# Couleurs pour le design
+BACKGROUND_COLOR = '#2f2b2d'  # Marron foncé
+TITLE_COLOR = "#F5F5DC"  # Doré
+
+
+# Créer le header (logo + titre)
+header_frame = Frame(fenetre, bg=BACKGROUND_COLOR)
+header_frame.pack(fill="x", pady=20)
+
+# Charger et afficher le logo
+logo_image = charger_logo()
+if logo_image:
+    logo_label = Label(header_frame, image=logo_image, bg=BACKGROUND_COLOR)
+    logo_label.pack(side="left", padx=10)
+
+# Ajouter le titre doré
+label_titre = Label(
+    header_frame,
+    text="La Bonne Fourchette",
+    font=("Garamond", 34, "bold"),
+    bg=BACKGROUND_COLOR,
+    fg=TITLE_COLOR,  # Couleur dorée
+    anchor="w"
+)
+label_titre.pack(side="left", padx=10)
+
+# Cadre pour les boutons sur la gauche
+frame_gauche = Frame(fenetre, bg=BACKGROUND_COLOR)
+frame_gauche.pack(side="left", fill="y", padx=50, pady=50)
+
+# Boutons dans le cadre gauche
+Button(
+    frame_gauche, text="Afficher les Tables", font=("Garamond", 18), height=3, width=20,
+    background="indianred",
+).pack(pady=10)
+
+Button(
+    frame_gauche, text="Afficher les Reservations", font=("Garamond", 18), height=3, width=20,
+    background="indianred",
+).pack(pady=10)
+
+Button(
+    frame_gauche, text="Afficher Notifications", font=("Garamond", 18), height=3, width=20,
+    background="lightcoral",
+).pack(pady=10)
+
+Button(
+    frame_gauche, text="Créer Une Reservation", font=("Garamond", 18), height=3, width=20,
+    background="lightcoral",
+).pack(pady=10)
+----------
